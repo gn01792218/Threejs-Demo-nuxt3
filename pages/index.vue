@@ -4,10 +4,10 @@
 </template>
 <script lang="ts" setup>
 import * as THREE from 'three'
+import { Mesh } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 //1.創建三要素 : scene、camera、renderer
 const scene = new THREE.Scene();
-
 const camera = computed(() => {
     return new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 })
@@ -25,48 +25,98 @@ const renderer = computed(() => {
 /*
 * renderer.setSize() 通常我們希望設置全螢幕，但如果有效能考量，設置較低數值，將使的渲染加快。            
 */
+
+// 二、加入幾何物件
+//1.建立方形物件的二元素 材質、幾何體、網格
+// BoxGeometry - 盒型幾何物件 ， 盒型物件包含了頂點、面
+// MeshBasicMaterial - 材質物件 (可上色)
+// Mesh - 網格，接受 幾何體 與 材質 物件
+/*
+* Material 物件 : Three.js中共有多種材質物件，現在專注於 MeshBasicMaterial
+* 所有材質物件都接受一個 object 可以設置各種屬性，來應用到材質物件上
+* 注意 : MeshBasicMaterial 不受光源影響 
+*/
+//盒形物件
+const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+const cubeMaterial = new THREE.MeshBasicMaterial();
+const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+//平面物件
+const planeGeometry = new THREE.PlaneGeometry(10,10)
+const planeMaterial = new THREE.MeshBasicMaterial({
+    color:0xFFFFFF,
+    side:THREE.DoubleSide
+})
+const plane = new THREE.Mesh(planeGeometry,planeMaterial)
+plane.rotation.x = -0.5 * Math.PI
+
+//球形物件
+const sphereGeometry = new THREE.SphereGeometry(2)
+const sphereMaterial = new THREE.MeshBasicMaterial({
+    color:0x0000FF,
+    wireframe:true
+})
+const sphere = new Mesh(sphereGeometry, sphereMaterial)
+sphere.position.set(-2,2,-2)
+
 onMounted(() => {
-    // //2.調整renderer設定
+    //1.調整renderer設定
     renderer.value.setSize(window.innerWidth, window.innerHeight);
-    // //3.把Renderer掛到DOM中，會是一個canvas
+    //2.把Renderer掛到DOM中，會是一個canvas
     document.getElementById('three').appendChild(renderer.value.domElement);
-    //4.建立輔助線
-    const axesHelper = new THREE.AxesHelper(5)
-    scene.add(axesHelper)
-    //5.建立orbit control
-    const orbit = new OrbitControls(camera.value, renderer.value.domElement)
-    orbit.update()
-    // 二、加入一個正方形物件
-    //1.建立方形物件的二元素 材質、幾何體、網格
-    // BoxGeometry - 盒型幾何物件 ， 盒型物件包含了頂點、面
-    // MeshBasicMaterial - 材質物件 (可上色)
-    // Mesh - 網格，接受 幾何體 與 材質 物件
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
 
-    //2.加入場景，預設會加到座標(0,0,0)，將會跟相機重疊
-    scene.add(cube);
-
-    //3.因此設置相機位置退後一點
+    //3.建立輔助工具
+    addAxesHepler(scene)
+    addGridHelper(scene)
+    //orbit control
+    addOrbitControls(camera.value,renderer.value)
+    //4.加入幾何體
+    scene.add(cube)
+    scene.add(plane)
+    scene.add(sphere)
+    //5.設置相機位置退後一點
     camera.value.position.set(1, 1, 5)
 
-    /*
-    * Material 物件 : Three.js中共有多種材質物件，現在專注於 MeshBasicMaterial
-    * 所有材質物件都接受一個 object 可以設置各種屬性，來應用到材質物件上
-    * 注意 : MeshBasicMaterial 不受光源影響
-    */
-    // 四、渲染場景
-
-    function animate(time) {
-        //操作cube的動畫
-        cube.rotation.x = time / 1000;
-        cube.rotation.y = time / 1000;
-        //渲染
-        renderer.value.render(scene, camera.value);
-        console.log('render')
-    }
+    //6.渲染場景
     //預設下每秒會畫60次
     renderer.value.setAnimationLoop(animate)
 })
+
+function animate(time) {
+    //操作cube的動畫
+    cube.rotation.x = time / 1000;
+    cube.rotation.y = time / 1000;
+    //渲染
+    renderer.value.render(scene, camera.value);
+}
+//輔助工具
+/**
+ * 建立輔助軸線工具
+ * @param sceneObj 必填
+ * @param axesLength 選填
+ */
+function addAxesHepler(sceneObj:THREE.Scene,axesLength:number=5){
+    sceneObj.add(new THREE.AxesHelper(axesLength))
+}
+/**
+ * 建立網格輔助工具
+ * @param sceneObj 必填 
+ */
+function addGridHelper(sceneObj:THREE.Scene){
+   //建構子選填參數(size?: number, divisions?: number, color1?: THREE.ColorRepresentation, color2?: THREE.ColorRepresentation)
+   //網格預設下產生100格，
+   //size預設10，表示寬高為10(px)， 
+   //divisions 預設10，表示把網格切分成10*10 = 100 格
+    sceneObj.add(new THREE.GridHelper())
+}
+/**
+ * 建立滑鼠導覽
+ * @param cameraObj 
+ * @param rendererObj 
+ */
+function addOrbitControls(cameraObj:THREE.Camera,rendererObj:THREE.Renderer){
+    const orbit = new OrbitControls(cameraObj, rendererObj.domElement)
+    orbit.update()
+}
+
 </script>
