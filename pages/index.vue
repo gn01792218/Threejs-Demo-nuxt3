@@ -4,8 +4,9 @@
 </template>
 <script lang="ts" setup>
 import * as THREE from 'three'
-import { Mesh } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+// import * as dat from 'dat.gui'
+
 //1.創建三要素 : scene、camera、renderer
 const scene = new THREE.Scene();
 const camera = computed(() => {
@@ -26,8 +27,8 @@ const renderer = computed(() => {
 * renderer.setSize() 通常我們希望設置全螢幕，但如果有效能考量，設置較低數值，將使的渲染加快。            
 */
 
-// 二、加入幾何物件
-//1.建立方形物件的二元素 材質、幾何體、網格
+// 2、加入幾何物件
+//建立方形物件的二元素 材質、幾何體、網格
 // BoxGeometry - 盒型幾何物件 ， 盒型物件包含了頂點、面
 // MeshBasicMaterial - 材質物件 (可上色)
 // Mesh - 網格，接受 幾何體 與 材質 物件
@@ -38,26 +39,26 @@ const renderer = computed(() => {
 */
 //盒形物件
 const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-const cubeMaterial = new THREE.MeshBasicMaterial();
+const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
 //平面物件
-const planeGeometry = new THREE.PlaneGeometry(10,10)
+const planeGeometry = new THREE.PlaneGeometry(10, 10)
 const planeMaterial = new THREE.MeshBasicMaterial({
-    color:0xFFFFFF,
-    side:THREE.DoubleSide
+    color: 0xFFFFFF,
+    side: THREE.DoubleSide
 })
-const plane = new THREE.Mesh(planeGeometry,planeMaterial)
+const plane = new THREE.Mesh(planeGeometry, planeMaterial)
 plane.rotation.x = -0.5 * Math.PI
 
 //球形物件
 const sphereGeometry = new THREE.SphereGeometry(2)
 const sphereMaterial = new THREE.MeshBasicMaterial({
-    color:0x0000FF,
-    wireframe:true
+    color: 0x0000FF,
+    wireframe: true,
 })
-const sphere = new Mesh(sphereGeometry, sphereMaterial)
-sphere.position.set(-2,2,-2)
+const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
+sphere.position.set(-2, 2, -2)
 
 onMounted(() => {
     //1.調整renderer設定
@@ -69,7 +70,10 @@ onMounted(() => {
     addAxesHepler(scene)
     addGridHelper(scene)
     //orbit control
-    addOrbitControls(camera.value,renderer.value)
+    addOrbitControls(camera.value, renderer.value)
+    //GUI工具
+    addGUI()
+    
     //4.加入幾何體
     scene.add(cube)
     scene.add(plane)
@@ -81,7 +85,6 @@ onMounted(() => {
     //預設下每秒會畫60次
     renderer.value.setAnimationLoop(animate)
 })
-
 function animate(time) {
     //操作cube的動畫
     cube.rotation.x = time / 1000;
@@ -95,18 +98,18 @@ function animate(time) {
  * @param sceneObj 必填
  * @param axesLength 選填
  */
-function addAxesHepler(sceneObj:THREE.Scene,axesLength:number=5){
+function addAxesHepler(sceneObj: THREE.Scene, axesLength: number = 5) {
     sceneObj.add(new THREE.AxesHelper(axesLength))
 }
 /**
  * 建立網格輔助工具
  * @param sceneObj 必填 
  */
-function addGridHelper(sceneObj:THREE.Scene){
-   //建構子選填參數(size?: number, divisions?: number, color1?: THREE.ColorRepresentation, color2?: THREE.ColorRepresentation)
-   //網格預設下產生100格，
-   //size預設10，表示寬高為10(px)， 
-   //divisions 預設10，表示把網格切分成10*10 = 100 格
+function addGridHelper(sceneObj: THREE.Scene) {
+    //建構子選填參數(size?: number, divisions?: number, color1?: THREE.ColorRepresentation, color2?: THREE.ColorRepresentation)
+    //網格預設下產生100格，
+    //size預設10，表示寬高為10(px)， 
+    //divisions 預設10，表示把網格切分成10*10 = 100 格
     sceneObj.add(new THREE.GridHelper())
 }
 /**
@@ -114,9 +117,43 @@ function addGridHelper(sceneObj:THREE.Scene){
  * @param cameraObj 
  * @param rendererObj 
  */
-function addOrbitControls(cameraObj:THREE.Camera,rendererObj:THREE.Renderer){
+function addOrbitControls(cameraObj: THREE.Camera, rendererObj: THREE.Renderer) {
     const orbit = new OrbitControls(cameraObj, rendererObj.domElement)
     orbit.update()
+}
+
+//GUI工具
+async function addGUI() {
+    const dat = await import ('dat.gui')
+    // //3.建立GUI介面
+    const gui = new dat.GUI()
+
+    //要開啟的GUI選項
+    const options = {
+        sphereColor: '#ffea00',
+        wireframe: false,
+        speed:0.01,
+    }
+
+    //為物件加入顏色color picker，以控制顏色變化
+    gui
+        .addColor(options, 'sphereColor')
+        .onChange((e) => {
+            sphere.material.color.set(e)
+        })
+
+    //為物件加入是否顯示線框的checkbox
+    gui
+        .add(options, 'wireframe')
+        .onChange((e) => {
+            sphere.material.wireframe = e
+        })
+    
+    //加入全局的速度slider
+    //最後面兩參數分別是最小值和最大值
+    //使用時，只要options.speed就可以獲取速度值
+    gui
+        .add(options, 'speed',0 ,0.1)
 }
 
 </script>
