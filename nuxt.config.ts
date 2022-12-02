@@ -1,10 +1,8 @@
-import { defineNuxtConfig } from "nuxt";
-
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
-export default defineNuxtConfig({
+export default {
     target:'static',
     router: {
-        base: '/gn01792218.github.io/Threejs-Demo-nuxt3/'
+        base: '/Threejs-Demo-nuxt3/'
     },
     css: ["~/assets/css/style.css"],
     build:{
@@ -17,4 +15,4 @@ export default defineNuxtConfig({
             }
         }
     },
-});
+};
