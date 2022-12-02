@@ -4,7 +4,7 @@ import { defineNuxtConfig } from "nuxt";
 export default defineNuxtConfig({
     target:'static',
     router: {
-        base: '/Threejs-Demo-nuxt3/'
+        base: '/gn01792218.github.io/Threejs-Demo-nuxt3/'
     },
     css: ["~/assets/css/style.css"],
     build:{
