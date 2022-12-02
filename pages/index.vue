@@ -37,25 +37,24 @@ const renderer = computed(() => {
 * 所有材質物件都接受一個 object 可以設置各種屬性，來應用到材質物件上
 * 注意 : MeshBasicMaterial 不受光源影響 
 */
-//盒形物件
+//盒形物件 ( BasicMaterial 不受光源影響 )
 const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
 const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-//平面物件
+//平面物件 ( StandardMaterial )
 const planeGeometry = new THREE.PlaneGeometry(10, 10)
-const planeMaterial = new THREE.MeshBasicMaterial({
+const planeMaterial = new THREE.MeshStandardMaterial({
     color: 0xFFFFFF,
     side: THREE.DoubleSide
 })
 const plane = new THREE.Mesh(planeGeometry, planeMaterial)
 plane.rotation.x = -0.5 * Math.PI
 
-//球形物件
+//球形物件 ( StandardMaterial )
 const sphereGeometry = new THREE.SphereGeometry(2)
-const sphereMaterial = new THREE.MeshBasicMaterial({
+const sphereMaterial = new THREE.MeshStandardMaterial({
     color: 0x0000FF,
-    wireframe: true,
 })
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
 sphere.position.set(-2, 2, -2)
@@ -73,7 +72,7 @@ onMounted(() => {
     addOrbitControls(camera.value, renderer.value)
     //GUI工具
     addGUI()
-    
+
     //4.加入幾何體
     scene.add(cube)
     scene.add(plane)
@@ -81,7 +80,10 @@ onMounted(() => {
     //5.設置相機位置退後一點
     camera.value.position.set(1, 1, 5)
 
-    //6.渲染場景
+    //6.加入光源
+    addAmbientLight(scene)
+    addDirectionLight(scene,true)
+    //7.渲染場景
     //預設下每秒會畫60次
     renderer.value.setAnimationLoop(animate)
 })
@@ -154,6 +156,19 @@ async function addGUI() {
     //使用時，只要options.speed就可以獲取速度值
     gui
         .add(options, 'speed',0 ,0.1)
+}
+
+//光源
+function addAmbientLight(sceneObj:THREE.Scene){
+    sceneObj.add(new THREE.AmbientLight(0x333333))
+}
+function addDirectionLight(sceneObj:THREE.Scene,helper:boolean){
+    const dirLight = new THREE.DirectionalLight(0xffffff,0.8)
+    sceneObj.add(dirLight)
+    dirLight.position.set(-10,10,0)
+    if(helper){
+        sceneObj.add(new THREE.DirectionalLightHelper(dirLight))
+    }
 }
 
 </script>
