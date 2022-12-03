@@ -50,6 +50,7 @@ const planeMaterial = new THREE.MeshStandardMaterial({
 })
 const plane = new THREE.Mesh(planeGeometry, planeMaterial)
 plane.rotation.x = -0.5 * Math.PI
+plane.receiveShadow = true
 
 //球形物件 ( StandardMaterial )
 const sphereGeometry = new THREE.SphereGeometry(2)
@@ -57,14 +58,16 @@ const sphereMaterial = new THREE.MeshStandardMaterial({
     color: 0x0000FF,
 })
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-sphere.position.set(-2, 2, -2)
+sphere.position.set(-2, 1.5, -2)
+sphere.castShadow = true
 
 onMounted(() => {
     //1.調整renderer設定
     renderer.value.setSize(window.innerWidth, window.innerHeight);
     //2.把Renderer掛到DOM中，會是一個canvas
     document.getElementById('three').appendChild(renderer.value.domElement);
-
+    //打開陰影
+    enableShadowMap(renderer.value)
     //3.建立輔助工具
     addAxesHepler(scene)
     addGridHelper(scene)
@@ -163,12 +166,20 @@ function addAmbientLight(sceneObj:THREE.Scene){
     sceneObj.add(new THREE.AmbientLight(0x333333))
 }
 function addDirectionLight(sceneObj:THREE.Scene,helper:boolean){
-    const dirLight = new THREE.DirectionalLight(0xffffff,0.8)
+    const dirLight = new THREE.DirectionalLight(0xffffff,5)
     sceneObj.add(dirLight)
     dirLight.position.set(-10,10,0)
+    
+    //製造光影
+    dirLight.castShadow = true
     if(helper){
         sceneObj.add(new THREE.DirectionalLightHelper(dirLight))
+        sceneObj.add(new THREE.CameraHelper(dirLight.shadow.camera))
     }
+}
+//陰影
+function enableShadowMap(renderer:THREE.Renderer){
+    renderer.shadowMap.enabled = true
 }
 
 </script>
