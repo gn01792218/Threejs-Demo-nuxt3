@@ -5,13 +5,10 @@
     "dev": "nuxt dev --open",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "deploy": "push-dir --dir=dist --branch=gh-pages --cleanup",
-    "build:gh-pages": "cross-env DEPLOY_ENV=GH_PAGES nuxt build",
-    "generate:gh-pages": "cross-env DEPLOY_ENV=GH_PAGES nuxt generate"
+    "deploy": "push-dir --dir=dist --branch=gh-pages --cleanup"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.13",
-    "cross-env": "^7.0.3",
     "nuxt": "3.0.0-rc.6",
     "postcss": "^8.4.19",
     "push-dir": "^0.4.1",
