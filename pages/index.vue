@@ -5,7 +5,10 @@
 <script lang="ts" setup>
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import useImage from '~~/composables/util';
 
+//composables
+const { getImagesAssetsFileURL } = useImage()
 //1.創建三要素 : scene、camera、renderer
 const scene = new THREE.Scene();
 const camera = computed(() => {
@@ -71,6 +74,7 @@ const spotLightHelper = addSpotLightHelper(scene, spotLight)
 //場景霧化效果
 // scene.fog = new THREE.Fog(0xFFFFFF,5,100)
 scene.fog = new THREE.FogExp2(0xFFFFFF,0.01)
+
 //GUI配置選項
 //要開啟的GUI選項
 interface GUIOptions{
@@ -90,6 +94,9 @@ const options:GUIOptions = {
         intensity:1,
 }
 onMounted(() => {
+    //設置世界背景
+    setWorld2DBackground(scene)
+    // setWorldCubeBackground(scene)
     //1.調整renderer設定
     renderer.value.setSize(window.innerWidth, window.innerHeight);
     //2.把Renderer掛到DOM中，會是一個canvas
@@ -245,5 +252,23 @@ function addDirectionLightShadowHelper(sceneObj:THREE.Scene, derictionLight:THRE
     const directionLightShadowHelper = new THREE.CameraHelper(derictionLight.shadow.camera)
     sceneObj.add(directionLightShadowHelper)
     return directionLightShadowHelper
+}
+
+//設置場景背景圖
+//以cubeTexture設置六個面的背景圖
+function setWorldCubeBackground(sceneObj:THREE.Scene){
+    const cubeTextureLoader = new THREE.CubeTextureLoader()
+    sceneObj.background = cubeTextureLoader.load([
+        getImagesAssetsFileURL('galaxy.jpg'),
+        getImagesAssetsFileURL('space.jpg'),
+        getImagesAssetsFileURL('space.jpg'),
+        getImagesAssetsFileURL('space.jpg'),
+        getImagesAssetsFileURL('space.jpg'),
+        getImagesAssetsFileURL('sun.jpg'),
+    ])
+}
+function setWorld2DBackground(sceneObj:THREE.Scene){
+    const texture = new THREE.TextureLoader()
+    sceneObj.background = texture.load(getImagesAssetsFileURL('space.jpg'))
 }
 </script>
