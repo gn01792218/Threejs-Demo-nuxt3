@@ -17,6 +17,7 @@ const camera = computed(() => {
 const renderer = computed(() => {
     return new THREE.WebGLRenderer()
 })
+const textureLoader = new THREE.TextureLoader()  //材質下載
 /* 
 * camera 物件
 * 共有三種可以使用，目前先專注於 PerspectiveCamera (模擬人眼)
@@ -114,6 +115,8 @@ onMounted(() => {
     scene.add(cube)
     scene.add(plane)
     scene.add(sphere)
+    //貼材質的盒形物件
+    addSpaceTextureCube(scene)
     //5.設置相機位置退後一點
     camera.value.position.set(1, 1, 5)
     
@@ -259,16 +262,31 @@ function addDirectionLightShadowHelper(sceneObj:THREE.Scene, derictionLight:THRE
 function setWorldCubeBackground(sceneObj:THREE.Scene){
     const cubeTextureLoader = new THREE.CubeTextureLoader()
     sceneObj.background = cubeTextureLoader.load([
-        getImagesAssetsFileURL('galaxy.jpg'),
+        getImagesAssetsFileURL('galaxy.jpg'), //左面
+        getImagesAssetsFileURL('sun.jpg'), //右面
+        getImagesAssetsFileURL('space.jpg'), 
         getImagesAssetsFileURL('space.jpg'),
         getImagesAssetsFileURL('space.jpg'),
         getImagesAssetsFileURL('space.jpg'),
-        getImagesAssetsFileURL('space.jpg'),
-        getImagesAssetsFileURL('sun.jpg'),
     ])
 }
 function setWorld2DBackground(sceneObj:THREE.Scene){
     const texture = new THREE.TextureLoader()
     sceneObj.background = texture.load(getImagesAssetsFileURL('space.jpg'))
+}
+//貼材質的幾何體，需要在onMounted時再載入唷(因為loader的關係?!)
+function addSpaceTextureCube(sceneObj:THREE.Scene){
+    const cube2Geometry = new THREE.BoxGeometry(1, 1, 1);
+    const cube2Material = [
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('galaxy.jpg'))}),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('sun.jpg'))}),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
+    ]
+    const cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
+    scene.add(cube2)
+    cube2.position.set(0,3,0)
 }
 </script>
