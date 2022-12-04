@@ -5,7 +5,6 @@
 <script lang="ts" setup>
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-// import * as dat from 'dat.gui'
 
 //1.創建三要素 : scene、camera、renderer
 const scene = new THREE.Scene();
@@ -61,6 +60,31 @@ const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
 sphere.position.set(-2, 1.5, -2)
 sphere.castShadow = true
 
+//光源
+const ambientLight = addAmbientLight(scene)
+const spotLight= addSpotLight(scene)
+const spotLightHelper = addSpotLightHelper(scene, spotLight)
+// const directionLight = addDirectionLight(scene)
+// const directionLightHelper = addDirectionLightHelper(scene,directionLight)
+// const directionLightShadowHelper =  addDirectionLightShadowHelper(scene, directionLight)
+//GUI配置選項
+//要開啟的GUI選項
+interface GUIOptions{
+    sphereColor: string,
+    wireframe: boolean,
+    speed:number,
+    angle:number,
+    penumbra:number,
+    intensity:number,
+}
+const options:GUIOptions = {
+        sphereColor: '#ffea00',
+        wireframe: false,
+        speed:0.01,
+        angle:0.2,
+        penumbra:0,  //柔光效果
+        intensity:1,
+}
 onMounted(() => {
     //1.調整renderer設定
     renderer.value.setSize(window.innerWidth, window.innerHeight);
@@ -74,19 +98,15 @@ onMounted(() => {
     //orbit control
     addOrbitControls(camera.value, renderer.value)
     //GUI工具
-    addGUI()
-
+    addGUI(options)
     //4.加入幾何體
     scene.add(cube)
     scene.add(plane)
     scene.add(sphere)
     //5.設置相機位置退後一點
     camera.value.position.set(1, 1, 5)
-
-    //6.加入光源
-    addAmbientLight(scene)
-    addDirectionLight(scene,true)
-    //7.渲染場景
+    
+    //6.渲染場景
     //預設下每秒會畫60次
     renderer.value.setAnimationLoop(animate)
 })
@@ -94,6 +114,12 @@ function animate(time) {
     //操作cube的動畫
     cube.rotation.x = time / 1000;
     cube.rotation.y = time / 1000;
+
+    //讓SpotLigh 透過GUI操作屬性
+    // spotLight.angle = options.angle
+    // spotLight.penumbra = options.penumbra
+    // spotLight.intensity = options.intensity
+    // spotLightHelper.update()
     //渲染
     renderer.value.render(scene, camera.value);
 }
@@ -128,29 +154,22 @@ function addOrbitControls(cameraObj: THREE.Camera, rendererObj: THREE.Renderer) 
 }
 
 //GUI工具
-async function addGUI() {
+async function addGUI(options:GUIOptions) {
     const dat = await import ('dat.gui')
     // //3.建立GUI介面
     const gui = new dat.GUI()
 
-    //要開啟的GUI選項
-    const options = {
-        sphereColor: '#ffea00',
-        wireframe: false,
-        speed:0.01,
-    }
-
     //為物件加入顏色color picker，以控制顏色變化
     gui
         .addColor(options, 'sphereColor')
-        .onChange((e) => {
+        .onChange( e => {
             sphere.material.color.set(e)
         })
 
     //為物件加入是否顯示線框的checkbox
     gui
         .add(options, 'wireframe')
-        .onChange((e) => {
+        .onChange( e => {
             sphere.material.wireframe = e
         })
     
@@ -159,27 +178,69 @@ async function addGUI() {
     //使用時，只要options.speed就可以獲取速度值
     gui
         .add(options, 'speed',0 ,0.1)
+
+    //控制角度
+    gui
+        .add(options, 'angle',0 ,1)
+     //控制
+     gui
+        .add(options, 'penumbra',0 ,1)
+     //控制亮度
+     gui
+        .add(options, 'intensity',0 ,1)
 }
 
 //光源
 function addAmbientLight(sceneObj:THREE.Scene){
-    sceneObj.add(new THREE.AmbientLight(0x333333))
+    const ambientLight = new THREE.AmbientLight(0x333333)
+    sceneObj.add(ambientLight)
+    return ambientLight
 }
-function addDirectionLight(sceneObj:THREE.Scene,helper:boolean){
+function addDirectionLight(sceneObj:THREE.Scene){
     const dirLight = new THREE.DirectionalLight(0xffffff,5)
     sceneObj.add(dirLight)
     dirLight.position.set(-10,10,0)
     
     //製造光影
     dirLight.castShadow = true
-    if(helper){
-        sceneObj.add(new THREE.DirectionalLightHelper(dirLight))
-        sceneObj.add(new THREE.CameraHelper(dirLight.shadow.camera))
-    }
+
+    return dirLight
+}
+function addSpotLight(sceneObj:THREE.Scene){
+    const spotLight = new THREE.SpotLight(0xFFFFFF)
+    sceneObj.add(spotLight)
+    spotLight.position.set(-5,5,0)
+
+    //製造光影
+    spotLight.castShadow = true
+
+    //調整聚光燈發散角度
+    spotLight.angle = 0.8
+
+    //輔助工具
+
+    return spotLight
+}
+//光源Helper
+function addDirectionLightHelper(sceneObj:THREE.Scene,directionLight:THREE.DirectionalLight) {
+    const directionLightHelper = new THREE.DirectionalLightHelper(directionLight)
+    sceneObj.add(directionLightHelper)
+    return directionLightHelper
+}
+function addSpotLightHelper(sceneObj:THREE.Scene,spotLight:THREE.SpotLight) {
+    const spotLightHelper = new THREE.SpotLightHelper(spotLight)
+    sceneObj.add(spotLightHelper)
+    return spotLightHelper
 }
 //陰影
 function enableShadowMap(renderer:THREE.Renderer){
     renderer.shadowMap.enabled = true
+}
+//陰影Helper
+function addDirectionLightShadowHelper(sceneObj:THREE.Scene, derictionLight:THREE.DirectionalLight){
+    const directionLightShadowHelper = new THREE.CameraHelper(derictionLight.shadow.camera)
+    sceneObj.add(directionLightShadowHelper)
+    return directionLightShadowHelper
 }
 
 </script>
