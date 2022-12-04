@@ -67,6 +67,10 @@ const spotLightHelper = addSpotLightHelper(scene, spotLight)
 // const directionLight = addDirectionLight(scene)
 // const directionLightHelper = addDirectionLightHelper(scene,directionLight)
 // const directionLightShadowHelper =  addDirectionLightShadowHelper(scene, directionLight)
+
+//場景霧化效果
+// scene.fog = new THREE.Fog(0xFFFFFF,5,100)
+scene.fog = new THREE.FogExp2(0xFFFFFF,0.01)
 //GUI配置選項
 //要開啟的GUI選項
 interface GUIOptions{
@@ -242,5 +246,4 @@ function addDirectionLightShadowHelper(sceneObj:THREE.Scene, derictionLight:THRE
     sceneObj.add(directionLightShadowHelper)
     return directionLightShadowHelper
 }
-
 </script>
