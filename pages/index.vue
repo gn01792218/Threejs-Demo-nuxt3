@@ -54,6 +54,7 @@ const planeMaterial = new THREE.MeshStandardMaterial({
 const plane = new THREE.Mesh(planeGeometry, planeMaterial)
 plane.rotation.x = -0.5 * Math.PI
 plane.receiveShadow = true
+plane.name = 'plane'
 
 //球形物件 ( StandardMaterial )
 const sphereGeometry = new THREE.SphereGeometry(2)
@@ -63,6 +64,7 @@ const sphereMaterial = new THREE.MeshStandardMaterial({
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
 sphere.position.set(-2, 1.5, -2)
 sphere.castShadow = true
+const sphereId = sphere.id
 
 //光源
 const ambientLight = addAmbientLight(scene)
@@ -76,6 +78,10 @@ const spotLightHelper = addSpotLightHelper(scene, spotLight)
 // scene.fog = new THREE.Fog(0xFFFFFF,5,100)
 scene.fog = new THREE.FogExp2(0xFFFFFF,0.01)
 
+//互動效果
+//創建滑鼠的兩個端點
+const mousePosition = new THREE.Vector2()
+const rayCaster = new THREE.Raycaster()
 //GUI配置選項
 //要開啟的GUI選項
 interface GUIOptions{
@@ -123,6 +129,13 @@ onMounted(() => {
     //6.渲染場景
     //預設下每秒會畫60次
     renderer.value.setAnimationLoop(animate)
+
+    //7.註冊使用者互動事件
+    //獲取滑鼠移動座標
+    window.addEventListener('mousemove', e => {
+        mousePosition.x = ( e.clientX / window.innerWidth ) * 2 - 1
+        mousePosition.y = - (e.clientY / window.innerHeight ) *2 + 1
+    })
 })
 function animate(time) {
     //操作cube的動畫
@@ -134,6 +147,21 @@ function animate(time) {
     // spotLight.penumbra = options.penumbra
     // spotLight.intensity = options.intensity
     // spotLightHelper.update()
+
+    //使用者互動 把滑鼠位置和相機設成射線之兩端點
+    rayCaster.setFromCamera(mousePosition, camera.value)
+    //產生交互物件，獲得和使用者互動的資訊
+    const intersects = rayCaster.intersectObjects(scene.children)
+    //更新時，核對使用者互動物件，和球體的id
+	intersects.forEach(intersect => {
+		if(intersect.object.id === sphereId) {
+			intersect.object.material.color.set(0xff0000)
+		}
+        if(intersect.object.name === 'cube2') {
+            intersect.object.rotation.y = time / 1000
+            intersect.object.rotation.x = time / 1000
+        }
+	})
     //渲染
     renderer.value.render(scene, camera.value);
 }
@@ -286,6 +314,7 @@ function addSpaceTextureCube(sceneObj:THREE.Scene){
         new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
     ]
     const cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
+    cube2.name = 'cube2'
     scene.add(cube2)
     cube2.position.set(0,3,0)
 }
