@@ -152,11 +152,10 @@ function animate(time) {
     //操作cube的動畫
     cube.rotation.x = time / 1000;
     cube.rotation.y = time / 1000;
-<<<<<<< HEAD
+
     //操作頂點的動畫
     plane2.geometry.attributes.position.array[0] = -(time * Math.random())/1000
     plane2.geometry.attributes.position.needsUpdate = true
-=======
 
     //讓SpotLigh 透過GUI操作屬性
     // spotLight.angle = options.angle
@@ -178,7 +177,6 @@ function animate(time) {
             intersect.object.rotation.x = time / 1000
         }
 	})
->>>>>>> 146703f2403feb67a1aa74737c954ede21d67171
     //渲染
     renderer.value.render(scene, camera.value);
 }
