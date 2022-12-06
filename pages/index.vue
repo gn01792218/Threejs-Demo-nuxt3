@@ -51,6 +51,16 @@ const planeMaterial = new THREE.MeshStandardMaterial({
 const plane = new THREE.Mesh(planeGeometry, planeMaterial)
 plane.rotation.x = -0.5 * Math.PI
 
+//平面2
+const plane2Geometry = new THREE.PlaneGeometry(5, 5, 5, 2)
+const plane2Material = new THREE.MeshStandardMaterial({
+    color: 0xFFFFFF,
+    side: THREE.DoubleSide,
+    wireframe:true,
+})
+const plane2 = new THREE.Mesh(plane2Geometry, plane2Material)
+plane2.position.set(0,5,0)
+
 //球形物件 ( StandardMaterial )
 const sphereGeometry = new THREE.SphereGeometry(2)
 const sphereMaterial = new THREE.MeshStandardMaterial({
@@ -76,6 +86,7 @@ onMounted(() => {
     //4.加入幾何體
     scene.add(cube)
     scene.add(plane)
+    scene.add(plane2)
     scene.add(sphere)
     //5.設置相機位置退後一點
     camera.value.position.set(1, 1, 5)
@@ -91,6 +102,9 @@ function animate(time) {
     //操作cube的動畫
     cube.rotation.x = time / 1000;
     cube.rotation.y = time / 1000;
+    //操作頂點的動畫
+    plane2.geometry.attributes.position.array[0] = -(time * Math.random())/1000
+    plane2.geometry.attributes.position.needsUpdate = true
     //渲染
     renderer.value.render(scene, camera.value);
 }
