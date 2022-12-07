@@ -1,9 +1,11 @@
-export default function useImage() {
-    function getImagesAssetsFileURL(url: string) {
-        return new URL(`../../assets/images/${url}`, import.meta.url).href
-    }
+import useModelsUtil from "./useModelsUtil"
+import useImagesUtil from "./useImagesUtil"
+export default function useUtil() {
+    const { getModelsAssetsFileURL } = useModelsUtil()
+    const { getImagesAssetsFileURL } = useImagesUtil()
     return {
         //methods
+        getModelsAssetsFileURL,
         getImagesAssetsFileURL,
     }
 }

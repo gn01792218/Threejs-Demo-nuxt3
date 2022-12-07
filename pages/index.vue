@@ -5,10 +5,11 @@
 <script lang="ts" setup>
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import useImage from '~~/composables/util';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import useUtil from '~~/composables/util';
 
 //composables
-const { getImagesAssetsFileURL } = useImage()
+const { getModelsAssetsFileURL, getImagesAssetsFileURL } = useUtil()
 //1.創建三要素 : scene、camera、renderer
 const scene = new THREE.Scene();
 const camera = computed(() => {
@@ -17,7 +18,10 @@ const camera = computed(() => {
 const renderer = computed(() => {
     return new THREE.WebGLRenderer()
 })
+
+//Loader
 const textureLoader = new THREE.TextureLoader()  //材質下載
+
 /* 
 * camera 物件
 * 共有三種可以使用，目前先專注於 PerspectiveCamera (模擬人眼)
@@ -134,6 +138,9 @@ onMounted(() => {
     scene.add(sphere)
     //貼材質的盒形物件
     addSpaceTextureCube(scene)
+
+    //載入外部模型
+    loadGLTFModel('monkey.glb',{x:1,y:1,z:1})
     //5.設置相機位置退後一點
     camera.value.position.set(1, 1, 5)
     
@@ -332,5 +339,35 @@ function addSpaceTextureCube(sceneObj:THREE.Scene){
     cube2.name = 'cube2'
     scene.add(cube2)
     cube2.position.set(0,3,0)
+}
+//載入模型
+interface Position {
+    x:number,
+    y:number,
+    z:number
+}
+/**
+ * 
+ * @param modelFileName 必填，要載入的模型檔案名稱
+ * @param position 選填，檔案初始位置座標，預設( 0,0,0 )
+ */
+function loadGLTFModel(modelFileName:string,position:Position){
+    const gltfLoader = new GLTFLoader()
+
+    gltfLoader.load(getModelsAssetsFileURL(modelFileName),(gltf)=>{
+        const model = gltf.scene //取得模型
+        scene.add(model)
+
+        //設置座標
+        const { x=0, y=0, z=0 } = position
+        model.position.set(x,y,z)
+    },
+    (processing)=>{
+        //程序下載進度
+        console.log((processing.loaded / processing.total) * 100 + '%')
+    },
+    (error)=>{
+        console.log(error)
+    })
 }
 </script>
