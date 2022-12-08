@@ -140,7 +140,8 @@ onMounted(() => {
     addSpaceTextureCube(scene)
 
     //載入外部模型
-    loadGLTFModel('monkey.glb',{x:1,y:1,z:1})
+    loadGLTFModel('monkey.glb',{x:1,y:3,z:1})
+    loadGLTFModel('toyTrain.glb',{x:1,y:1,z:1})
     //5.設置相機位置退後一點
     camera.value.position.set(1, 1, 5)
     
@@ -154,6 +155,8 @@ onMounted(() => {
         mousePosition.x = ( e.clientX / window.innerWidth ) * 2 - 1
         mousePosition.y = - (e.clientY / window.innerHeight ) *2 + 1
     })
+    //8.註冊響應式
+    responsiveCanvas(camera.value, renderer.value)
 })
 function animate(time) {
     //操作cube的動畫
@@ -368,6 +371,15 @@ function loadGLTFModel(modelFileName:string,position:Position){
     },
     (error)=>{
         console.log(error)
+    })
+}
+//canvas響應式
+function responsiveCanvas(camera:THREE.PerspectiveCamera, renderer:THREE.Renderer){
+    window.addEventListener('resize', ()=>{
+        const { innerWidth, innerHeight } = window
+        camera.aspect = innerWidth / innerHeight
+        camera.updateProjectionMatrix()
+        renderer.setSize( innerWidth, innerHeight )
     })
 }
 </script>
