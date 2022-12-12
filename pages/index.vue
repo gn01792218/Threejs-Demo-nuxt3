@@ -21,10 +21,12 @@ const {
     addAxesHepler,
     addGridHelper,
     addOrbitControls,
+    addAmbientLight,
+    addDirectionLight,
+    addSpotLight,
+    getBoxGeometryWithTexture,
+    setWorld2DBackground,
 } = useTHREE()
-
-//Loader
-const textureLoader = new THREE.TextureLoader()  //材質下載
 
 // 2、加入幾何物件
 //建立方形物件的二元素 材質、幾何體、網格
@@ -97,7 +99,7 @@ const options: GUIOptions = {
 onMounted(() => {
     const [scene, camera, renderer] = init3DWorld('three')
     //設置世界背景
-    setWorld2DBackground(scene)
+    setWorld2DBackground(scene,getImagesAssetsFileURL('space.jpg'))
     // setWorldCubeBackground(scene)
     //1.調整renderer設定
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -132,7 +134,7 @@ onMounted(() => {
     })
     //7.添加光源
     const ambientLight = addAmbientLight(scene)
-    const spotLight = addSpotLight(scene)
+    const spotLight = addSpotLight(scene, 0xffffff)
     const spotLightHelper = addSpotLightHelper(scene, spotLight)
     // const directionLight = addDirectionLight(scene)
     // const directionLightHelper = addDirectionLightHelper(scene,directionLight)
@@ -210,37 +212,7 @@ function guiCallBack(gui: GUI, options: GUIOptions) {
     //控制亮度
     gui.add(options, 'intensity', 0, 1)
 }
-//光源
-function addAmbientLight(sceneObj: THREE.Scene) {
-    const ambientLight = new THREE.AmbientLight(0x333333)
-    sceneObj.add(ambientLight)
-    return ambientLight
-}
-function addDirectionLight(sceneObj: THREE.Scene) {
-    const dirLight = new THREE.DirectionalLight(0xffffff, 5)
-    sceneObj.add(dirLight)
-    dirLight.position.set(-10, 10, 0)
 
-    //製造光影
-    dirLight.castShadow = true
-
-    return dirLight
-}
-function addSpotLight(sceneObj: THREE.Scene) {
-    const spotLight = new THREE.SpotLight(0xFFFFFF)
-    sceneObj.add(spotLight)
-    spotLight.position.set(-5, 5, 0)
-
-    //製造光影
-    spotLight.castShadow = true
-
-    //調整聚光燈發散角度
-    spotLight.angle = 0.8
-
-    //輔助工具
-
-    return spotLight
-}
 //光源Helper
 function addDirectionLightHelper(sceneObj: THREE.Scene, directionLight: THREE.DirectionalLight) {
     const directionLightHelper = new THREE.DirectionalLightHelper(directionLight)
@@ -276,24 +248,19 @@ function setWorldCubeBackground(sceneObj: THREE.Scene) {
         getImagesAssetsFileURL('space.jpg'),
     ])
 }
-function setWorld2DBackground(sceneObj: THREE.Scene) {
-    const texture = new THREE.TextureLoader()
-    sceneObj.background = texture.load(getImagesAssetsFileURL('space.jpg'))
-}
+
 //貼材質的幾何體，需要在onMounted時再載入唷(因為loader的關係?!)
 function addSpaceTextureCube(sceneObj: THREE.Scene) {
-    const cube2Geometry = new THREE.BoxGeometry(1, 1, 1);
-    const cube2Material = [
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('galaxy.jpg')) }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('sun.jpg')) }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg')) }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg')) }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg')) }),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg')) }),
-    ]
-    const cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
-    cube2.name = 'cube2'
-    sceneObj.add(cube2)
-    cube2.position.set(0, 3, 0)
+    const cube = getBoxGeometryWithTexture([
+        getImagesAssetsFileURL('galaxy.jpg'),
+        getImagesAssetsFileURL('sun.jpg'),
+        getImagesAssetsFileURL('space.jpg'),
+        getImagesAssetsFileURL('space.jpg'),
+        getImagesAssetsFileURL('space.jpg'),
+        getImagesAssetsFileURL('space.jpg'),
+    ])
+    cube.name = 'cube2'
+    sceneObj.add(cube)
+    cube.position.set(0, 3, 0)
 }
 </script>
