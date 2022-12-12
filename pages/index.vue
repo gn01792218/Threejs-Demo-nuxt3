@@ -134,7 +134,7 @@ onMounted(() => {
     })
     //7.添加光源
     const ambientLight = addAmbientLight(scene)
-    const spotLight = addSpotLight(scene, 0xffffff)
+    const spotLight = addSpotLight(scene)
     const spotLightHelper = addSpotLightHelper(scene, spotLight)
     // const directionLight = addDirectionLight(scene)
     // const directionLightHelper = addDirectionLightHelper(scene,directionLight)
