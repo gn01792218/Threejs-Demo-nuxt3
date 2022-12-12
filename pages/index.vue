@@ -4,14 +4,24 @@
 </template>
 <script lang="ts" setup>
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import useUtil from '~~/composables/util'
 import useTHREE from '~~/composables/three'
+import { GUI } from 'dat.gui';
 
 //composables
-const { getImagesAssetsFileURL, responsiveThreeCanvas } = useUtil()
-//init3DWorld()創建三要素 : scene、camera、renderer
-const { init3DWorld, loadGLTFModel  } = useTHREE()
+const {
+    getImagesAssetsFileURL,
+    responsiveThreeCanvas
+} = useUtil()
+
+const {
+    init3DWorld,  //init3DWorld()創建三要素 : scene、camera、renderer
+    loadGLTFModel,
+    addGUI,
+    addAxesHepler,
+    addGridHelper,
+    addOrbitControls,
+} = useTHREE()
 
 //Loader
 const textureLoader = new THREE.TextureLoader()  //材質下載
@@ -47,10 +57,10 @@ const plane2Geometry = new THREE.PlaneGeometry(5, 5, 5, 2)
 const plane2Material = new THREE.MeshStandardMaterial({
     color: 0xFFFFFF,
     side: THREE.DoubleSide,
-    wireframe:true,
+    wireframe: true,
 })
 const plane2 = new THREE.Mesh(plane2Geometry, plane2Material)
-plane2.position.set(0,5,0)
+plane2.position.set(0, 5, 0)
 
 //球形物件 ( StandardMaterial )
 const sphereGeometry = new THREE.SphereGeometry(2)
@@ -68,24 +78,24 @@ const mousePosition = new THREE.Vector2()
 const rayCaster = new THREE.Raycaster()
 //GUI配置選項
 //要開啟的GUI選項
-interface GUIOptions{
+interface GUIOptions {
     sphereColor: string,
     wireframe: boolean,
-    speed:number,
-    angle:number,
-    penumbra:number,
-    intensity:number,
+    speed: number,
+    angle: number,
+    penumbra: number,
+    intensity: number,
 }
-const options:GUIOptions = {
-        sphereColor: '#ffea00',
-        wireframe: false,
-        speed:0.01,
-        angle:0.2,
-        penumbra:0,  //柔光效果
-        intensity:1,
+const options: GUIOptions = {
+    sphereColor: '#ffea00',
+    wireframe: false,
+    speed: 0.01,
+    angle: 0.2,
+    penumbra: 0,  //柔光效果
+    intensity: 1,
 }
 onMounted(() => {
-    const [ scene, camera , renderer ] = init3DWorld('three')
+    const [scene, camera, renderer] = init3DWorld('three')
     //設置世界背景
     setWorld2DBackground(scene)
     // setWorldCubeBackground(scene)
@@ -101,7 +111,7 @@ onMounted(() => {
     //orbit control
     addOrbitControls(camera, renderer)
     //GUI工具
-    addGUI(options)
+    addGUI(options, guiCallBack)
     //4.加入幾何體
     scene.add(cube)
     scene.add(plane)
@@ -110,19 +120,19 @@ onMounted(() => {
     //貼材質的盒形物件
     addSpaceTextureCube(scene)
     //載入外部模型
-    loadGLTFModel('monkey.glb',scene ,{x:1,y:3,z:1})
-    loadGLTFModel('toyTrain.gltf',scene ,{x:1,y:1,z:1})
+    loadGLTFModel('monkey.glb', scene, { x: 1, y: 3, z: 1 })
+    loadGLTFModel('toyTrain.gltf', scene, { x: 1, y: 1, z: 1 })
     //5.設置相機位置退後一點
     camera.position.set(1, 1, 5)
-    
+
     //6.渲染場景
     //預設下每秒會畫60次
-    renderer.setAnimationLoop((time)=>{
-        animate(scene,camera,renderer,time)
+    renderer.setAnimationLoop((time) => {
+        animate(scene, camera, renderer, time)
     })
     //7.添加光源
     const ambientLight = addAmbientLight(scene)
-    const spotLight= addSpotLight(scene)
+    const spotLight = addSpotLight(scene)
     const spotLightHelper = addSpotLightHelper(scene, spotLight)
     // const directionLight = addDirectionLight(scene)
     // const directionLightHelper = addDirectionLightHelper(scene,directionLight)
@@ -130,23 +140,23 @@ onMounted(() => {
 
     //8.場景霧化效果
     // scene.fog = new THREE.Fog(0xFFFFFF,5,100)
-    scene.fog = new THREE.FogExp2(0xFFFFFF,0.01)
+    scene.fog = new THREE.FogExp2(0xFFFFFF, 0.01)
     //9.註冊使用者互動事件
     //獲取滑鼠移動座標
     window.addEventListener('mousemove', e => {
-        mousePosition.x = ( e.clientX / window.innerWidth ) * 2 - 1
-        mousePosition.y = - (e.clientY / window.innerHeight ) *2 + 1
+        mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1
+        mousePosition.y = - (e.clientY / window.innerHeight) * 2 + 1
     })
     //8.註冊響應式
     responsiveThreeCanvas(camera, renderer)
 })
-function animate(sceneObj:THREE.Scene,cameraObj:THREE.PerspectiveCamera,rendererObj:THREE.WebGLRenderer,time:number) {
+function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rendererObj: THREE.WebGLRenderer, time: number) {
     //操作cube的動畫
     cube.rotation.x = time / 1000;
     cube.rotation.y = time / 1000;
 
     //操作頂點的動畫
-    plane2.geometry.attributes.position.array[0] = -(time * Math.random())/1000
+    plane2.geometry.attributes.position.array[0] = -(time * Math.random()) / 1000
     plane2.geometry.attributes.position.needsUpdate = true
 
     //讓SpotLigh 透過GUI操作屬性
@@ -160,105 +170,66 @@ function animate(sceneObj:THREE.Scene,cameraObj:THREE.PerspectiveCamera,renderer
     //產生交互物件，獲得和使用者互動的資訊
     const intersects = rayCaster.intersectObjects(sceneObj.children)
     //更新時，核對使用者互動物件，和球體的id
-	intersects.forEach(intersect => {
-		if(intersect.object.id === sphereId) {
-			intersect.object.material.color.set(0xff0000)
-		}
-        if(intersect.object.name === 'cube2') {
+    intersects.forEach(intersect => {
+        if (intersect.object.id === sphereId) {
+            intersect.object.material.color.set(0xff0000)
+        }
+        if (intersect.object.name === 'cube2') {
             intersect.object.rotation.y = time / 1000
             intersect.object.rotation.x = time / 1000
         }
-	})
+    })
     //渲染
     rendererObj.render(sceneObj, cameraObj);
 }
-//輔助工具
-/**
- * 建立輔助軸線工具
- * @param sceneObj 必填
- * @param axesLength 選填
- */
-function addAxesHepler(sceneObj: THREE.Scene, axesLength: number = 5) {
-    sceneObj.add(new THREE.AxesHelper(axesLength))
-}
-/**
- * 建立網格輔助工具
- * @param sceneObj 必填 
- */
-function addGridHelper(sceneObj: THREE.Scene) {
-    //建構子選填參數(size?: number, divisions?: number, color1?: THREE.ColorRepresentation, color2?: THREE.ColorRepresentation)
-    //網格預設下產生100格，
-    //size預設10，表示寬高為10(px)， 
-    //divisions 預設10，表示把網格切分成10*10 = 100 格
-    sceneObj.add(new THREE.GridHelper())
-}
-/**
- * 建立滑鼠導覽
- * @param cameraObj 
- * @param rendererObj 
- */
-function addOrbitControls(cameraObj: THREE.Camera, rendererObj: THREE.Renderer) {
-    const orbit = new OrbitControls(cameraObj, rendererObj.domElement)
-    orbit.update()
-}
 
-//GUI工具
-async function addGUI(options:GUIOptions) {
-    const dat = await import ('dat.gui')
-    // //3.建立GUI介面
-    const gui = new dat.GUI()
-
+//GUI設定
+function guiCallBack(gui: GUI, options: GUIOptions) {
     //為物件加入顏色color picker，以控制顏色變化
     gui
         .addColor(options, 'sphereColor')
-        .onChange( e => {
+        .onChange(e => {
             sphere.material.color.set(e)
         })
 
     //為物件加入是否顯示線框的checkbox
     gui
         .add(options, 'wireframe')
-        .onChange( e => {
+        .onChange(e => {
             sphere.material.wireframe = e
         })
-    
+
     //加入全局的速度slider
     //最後面兩參數分別是最小值和最大值
     //使用時，只要options.speed就可以獲取速度值
-    gui
-        .add(options, 'speed',0 ,0.1)
-
+    gui.add(options, 'speed', 0, 0.1)
     //控制角度
-    gui
-        .add(options, 'angle',0 ,1)
-     //控制
-     gui
-        .add(options, 'penumbra',0 ,1)
-     //控制亮度
-     gui
-        .add(options, 'intensity',0 ,1)
+    gui.add(options, 'angle', 0, 1)
+    //控制
+    gui.add(options, 'penumbra', 0, 1)
+    //控制亮度
+    gui.add(options, 'intensity', 0, 1)
 }
-
 //光源
-function addAmbientLight(sceneObj:THREE.Scene){
+function addAmbientLight(sceneObj: THREE.Scene) {
     const ambientLight = new THREE.AmbientLight(0x333333)
     sceneObj.add(ambientLight)
     return ambientLight
 }
-function addDirectionLight(sceneObj:THREE.Scene){
-    const dirLight = new THREE.DirectionalLight(0xffffff,5)
+function addDirectionLight(sceneObj: THREE.Scene) {
+    const dirLight = new THREE.DirectionalLight(0xffffff, 5)
     sceneObj.add(dirLight)
-    dirLight.position.set(-10,10,0)
-    
+    dirLight.position.set(-10, 10, 0)
+
     //製造光影
     dirLight.castShadow = true
 
     return dirLight
 }
-function addSpotLight(sceneObj:THREE.Scene){
+function addSpotLight(sceneObj: THREE.Scene) {
     const spotLight = new THREE.SpotLight(0xFFFFFF)
     sceneObj.add(spotLight)
-    spotLight.position.set(-5,5,0)
+    spotLight.position.set(-5, 5, 0)
 
     //製造光影
     spotLight.castShadow = true
@@ -271,22 +242,22 @@ function addSpotLight(sceneObj:THREE.Scene){
     return spotLight
 }
 //光源Helper
-function addDirectionLightHelper(sceneObj:THREE.Scene,directionLight:THREE.DirectionalLight) {
+function addDirectionLightHelper(sceneObj: THREE.Scene, directionLight: THREE.DirectionalLight) {
     const directionLightHelper = new THREE.DirectionalLightHelper(directionLight)
     sceneObj.add(directionLightHelper)
     return directionLightHelper
 }
-function addSpotLightHelper(sceneObj:THREE.Scene,spotLight:THREE.SpotLight) {
+function addSpotLightHelper(sceneObj: THREE.Scene, spotLight: THREE.SpotLight) {
     const spotLightHelper = new THREE.SpotLightHelper(spotLight)
     sceneObj.add(spotLightHelper)
     return spotLightHelper
 }
 //陰影
-function enableShadowMap(renderer:THREE.WebGLRenderer){
+function enableShadowMap(renderer: THREE.WebGLRenderer) {
     renderer.shadowMap.enabled = true
 }
 //陰影Helper
-function addDirectionLightShadowHelper(sceneObj:THREE.Scene, derictionLight:THREE.DirectionalLight){
+function addDirectionLightShadowHelper(sceneObj: THREE.Scene, derictionLight: THREE.DirectionalLight) {
     const directionLightShadowHelper = new THREE.CameraHelper(derictionLight.shadow.camera)
     sceneObj.add(directionLightShadowHelper)
     return directionLightShadowHelper
@@ -294,35 +265,35 @@ function addDirectionLightShadowHelper(sceneObj:THREE.Scene, derictionLight:THRE
 
 //設置場景背景圖
 //以cubeTexture設置六個面的背景圖
-function setWorldCubeBackground(sceneObj:THREE.Scene){
+function setWorldCubeBackground(sceneObj: THREE.Scene) {
     const cubeTextureLoader = new THREE.CubeTextureLoader()
     sceneObj.background = cubeTextureLoader.load([
         getImagesAssetsFileURL('galaxy.jpg'), //左面
         getImagesAssetsFileURL('sun.jpg'), //右面
-        getImagesAssetsFileURL('space.jpg'), 
+        getImagesAssetsFileURL('space.jpg'),
         getImagesAssetsFileURL('space.jpg'),
         getImagesAssetsFileURL('space.jpg'),
         getImagesAssetsFileURL('space.jpg'),
     ])
 }
-function setWorld2DBackground(sceneObj:THREE.Scene){
+function setWorld2DBackground(sceneObj: THREE.Scene) {
     const texture = new THREE.TextureLoader()
     sceneObj.background = texture.load(getImagesAssetsFileURL('space.jpg'))
 }
 //貼材質的幾何體，需要在onMounted時再載入唷(因為loader的關係?!)
-function addSpaceTextureCube(sceneObj:THREE.Scene){
+function addSpaceTextureCube(sceneObj: THREE.Scene) {
     const cube2Geometry = new THREE.BoxGeometry(1, 1, 1);
     const cube2Material = [
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('galaxy.jpg'))}),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('sun.jpg'))}),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
-        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg'))}),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('galaxy.jpg')) }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('sun.jpg')) }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg')) }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg')) }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg')) }),
+        new THREE.MeshBasicMaterial({ map: textureLoader.load(getImagesAssetsFileURL('space.jpg')) }),
     ]
     const cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
     cube2.name = 'cube2'
     sceneObj.add(cube2)
-    cube2.position.set(0,3,0)
+    cube2.position.set(0, 3, 0)
 }
 </script>
