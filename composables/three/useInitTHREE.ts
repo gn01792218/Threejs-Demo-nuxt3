@@ -11,11 +11,11 @@ export default function useInitTHREE() {
      * 注意事項 : 
      * 因為有需要和Dom互動，所以請在mounted時使用
      */
-    function init3DWorld(threeElementId:string):[THREE.Scene, THREE.PerspectiveCamera, THREE.WebGLRenderer] {
+    function init3DWorld(threeElementId: string): [THREE.Scene, THREE.PerspectiveCamera, THREE.WebGLRenderer] {
         //1.創建三要素 : scene、camera、renderer
         const scene = new THREE.Scene();
-        const camera =  new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer =  new THREE.WebGLRenderer()
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer()
 
         //1.調整renderer設定
         renderer.setSize(window.innerWidth, window.innerHeight);
