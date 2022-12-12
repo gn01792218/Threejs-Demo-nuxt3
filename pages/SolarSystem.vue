@@ -7,7 +7,6 @@
 import * as THREE from 'three'
 import useUtil from '~~/composables/util'
 import useTHREE from '~~/composables/three'
-import { GUI } from 'dat.gui';
 
 //composables
 const {
@@ -21,12 +20,13 @@ const {
     addGridHelper,
     addOrbitControls,
     getBoxGeometryWithTexture,
+    setWorld2DBackground,
 } = useTHREE()
 
 onMounted(() => {
     const [scene, camera, renderer] = init3DWorld('three')
     //設置世界背景
-    setWorld2DBackground(scene)
+    setWorld2DBackground(scene,getImagesAssetsFileURL('space.jpg'))
     // setWorldCubeBackground(scene)
     //1.調整renderer設定
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -69,10 +69,6 @@ function setWorldCubeBackground(sceneObj: THREE.Scene) {
         getImagesAssetsFileURL('space.jpg'),
         getImagesAssetsFileURL('space.jpg'),
     ])
-}
-function setWorld2DBackground(sceneObj: THREE.Scene) {
-    const texture = new THREE.TextureLoader()
-    sceneObj.background = texture.load(getImagesAssetsFileURL('space.jpg'))
 }
 //貼材質的幾何體，需要在onMounted時再載入唷(因為loader的關係?!)
 
