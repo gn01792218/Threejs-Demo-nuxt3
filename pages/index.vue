@@ -6,33 +6,15 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import useUtil from '~~/composables/util';
-
+import useUtil from '~~/composables/util'
+import useTHREE from '~~/composables/three'
 //composables
-const { getModelsAssetsFileURL, getImagesAssetsFileURL } = useUtil()
-//1.創建三要素 : scene、camera、renderer
-const scene = new THREE.Scene();
-const camera = computed(() => {
-    return new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-})
-const renderer = computed(() => {
-    return new THREE.WebGLRenderer()
-})
+const { getModelsAssetsFileURL, getImagesAssetsFileURL, responsiveThreeCanvas } = useUtil()
+//init3DWorld()創建三要素 : scene、camera、renderer
+const { init3DWorld } = useTHREE()
 
 //Loader
 const textureLoader = new THREE.TextureLoader()  //材質下載
-
-/* 
-* camera 物件
-* 共有三種可以使用，目前先專注於 PerspectiveCamera (模擬人眼)
-* 參數一 : 設置camera的視野( FOV，field of view )
-* 參數二 : view的寬高比
-* 參數三、四 : 設置 最近 / 最遠 的clipping plane (截平面)，簡單說即超出 camera 最近/最遠 的object 將不會render，調整此數值，通常是為了效能。
-*/
-
-/*
-* renderer.setSize() 通常我們希望設置全螢幕，但如果有效能考量，設置較低數值，將使的渲染加快。            
-*/
 
 // 2、加入幾何物件
 //建立方形物件的二元素 材質、幾何體、網格
@@ -80,18 +62,6 @@ sphere.position.set(-2, 1.5, -2)
 sphere.castShadow = true
 const sphereId = sphere.id
 
-//光源
-const ambientLight = addAmbientLight(scene)
-const spotLight= addSpotLight(scene)
-const spotLightHelper = addSpotLightHelper(scene, spotLight)
-// const directionLight = addDirectionLight(scene)
-// const directionLightHelper = addDirectionLightHelper(scene,directionLight)
-// const directionLightShadowHelper =  addDirectionLightShadowHelper(scene, directionLight)
-
-//場景霧化效果
-// scene.fog = new THREE.Fog(0xFFFFFF,5,100)
-scene.fog = new THREE.FogExp2(0xFFFFFF,0.01)
-
 //互動效果
 //創建滑鼠的兩個端點
 const mousePosition = new THREE.Vector2()
@@ -115,20 +85,21 @@ const options:GUIOptions = {
         intensity:1,
 }
 onMounted(() => {
+    const [ scene, camera , renderer ] = init3DWorld('three')
     //設置世界背景
     setWorld2DBackground(scene)
     // setWorldCubeBackground(scene)
     //1.調整renderer設定
-    renderer.value.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
     //2.把Renderer掛到DOM中，會是一個canvas
-    document.getElementById('three').appendChild(renderer.value.domElement);
+    document.getElementById('three').appendChild(renderer.domElement);
     //打開陰影
-    enableShadowMap(renderer.value)
+    enableShadowMap(renderer)
     //3.建立輔助工具
     addAxesHepler(scene)
     addGridHelper(scene)
     //orbit control
-    addOrbitControls(camera.value, renderer.value)
+    addOrbitControls(camera, renderer)
     //GUI工具
     addGUI(options)
     //4.加入幾何體
@@ -138,27 +109,38 @@ onMounted(() => {
     scene.add(sphere)
     //貼材質的盒形物件
     addSpaceTextureCube(scene)
-
     //載入外部模型
-    loadGLTFModel('monkey.glb',{x:1,y:3,z:1})
-    loadGLTFModel('toyTrain.glb',{x:1,y:1,z:1})
+    loadGLTFModel('monkey.glb',scene ,{x:1,y:3,z:1})
+    loadGLTFModel('toyTrain.gltf',scene ,{x:1,y:1,z:1})
     //5.設置相機位置退後一點
-    camera.value.position.set(1, 1, 5)
+    camera.position.set(1, 1, 5)
     
     //6.渲染場景
     //預設下每秒會畫60次
-    renderer.value.setAnimationLoop(animate)
+    renderer.setAnimationLoop((time)=>{
+        animate(scene,camera,renderer,time)
+    })
+    //7.添加光源
+    const ambientLight = addAmbientLight(scene)
+    const spotLight= addSpotLight(scene)
+    const spotLightHelper = addSpotLightHelper(scene, spotLight)
+    // const directionLight = addDirectionLight(scene)
+    // const directionLightHelper = addDirectionLightHelper(scene,directionLight)
+    // const directionLightShadowHelper =  addDirectionLightShadowHelper(scene, directionLight)
 
-    //7.註冊使用者互動事件
+    //8.場景霧化效果
+    // scene.fog = new THREE.Fog(0xFFFFFF,5,100)
+    scene.fog = new THREE.FogExp2(0xFFFFFF,0.01)
+    //9.註冊使用者互動事件
     //獲取滑鼠移動座標
     window.addEventListener('mousemove', e => {
         mousePosition.x = ( e.clientX / window.innerWidth ) * 2 - 1
         mousePosition.y = - (e.clientY / window.innerHeight ) *2 + 1
     })
     //8.註冊響應式
-    responsiveCanvas(camera.value, renderer.value)
+    responsiveThreeCanvas(camera, renderer)
 })
-function animate(time) {
+function animate(sceneObj:THREE.Scene,cameraObj:THREE.PerspectiveCamera,rendererObj:THREE.WebGLRenderer,time:number) {
     //操作cube的動畫
     cube.rotation.x = time / 1000;
     cube.rotation.y = time / 1000;
@@ -174,9 +156,9 @@ function animate(time) {
     // spotLightHelper.update()
 
     //使用者互動 把滑鼠位置和相機設成射線之兩端點
-    rayCaster.setFromCamera(mousePosition, camera.value)
+    rayCaster.setFromCamera(mousePosition, cameraObj)
     //產生交互物件，獲得和使用者互動的資訊
-    const intersects = rayCaster.intersectObjects(scene.children)
+    const intersects = rayCaster.intersectObjects(sceneObj.children)
     //更新時，核對使用者互動物件，和球體的id
 	intersects.forEach(intersect => {
 		if(intersect.object.id === sphereId) {
@@ -188,7 +170,7 @@ function animate(time) {
         }
 	})
     //渲染
-    renderer.value.render(scene, camera.value);
+    rendererObj.render(sceneObj, cameraObj);
 }
 //輔助工具
 /**
@@ -300,7 +282,7 @@ function addSpotLightHelper(sceneObj:THREE.Scene,spotLight:THREE.SpotLight) {
     return spotLightHelper
 }
 //陰影
-function enableShadowMap(renderer:THREE.Renderer){
+function enableShadowMap(renderer:THREE.WebGLRenderer){
     renderer.shadowMap.enabled = true
 }
 //陰影Helper
@@ -340,7 +322,7 @@ function addSpaceTextureCube(sceneObj:THREE.Scene){
     ]
     const cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
     cube2.name = 'cube2'
-    scene.add(cube2)
+    sceneObj.add(cube2)
     cube2.position.set(0,3,0)
 }
 //載入模型
@@ -352,15 +334,21 @@ interface Position {
 /**
  * 
  * @param modelFileName 必填，要載入的模型檔案名稱
+ * @param scene 必填，將載入之模型添加到目標場景中
  * @param position 選填，檔案初始位置座標，預設( 0,0,0 )
+ * @param camera 選填，可以將我們的camera設置成下載檔案中的"第一台"攝影機
  */
-function loadGLTFModel(modelFileName:string,position:Position){
+function loadGLTFModel(modelFileName:string, scene:THREE.Scene, position:Position ,camera?:THREE.Camera){
     const gltfLoader = new GLTFLoader()
 
     gltfLoader.load(getModelsAssetsFileURL(modelFileName),(gltf)=>{
         const model = gltf.scene //取得模型
-        scene.add(model)
 
+        //若想要使用檔案的camera
+        if(camera) camera = gltf.cameras[1]
+
+        //加入模型
+        scene.add(model)
         //設置座標
         const { x=0, y=0, z=0 } = position
         model.position.set(x,y,z)
@@ -373,13 +361,5 @@ function loadGLTFModel(modelFileName:string,position:Position){
         console.log(error)
     })
 }
-//canvas響應式
-function responsiveCanvas(camera:THREE.PerspectiveCamera, renderer:THREE.Renderer){
-    window.addEventListener('resize', ()=>{
-        const { innerWidth, innerHeight } = window
-        camera.aspect = innerWidth / innerHeight
-        camera.updateProjectionMatrix()
-        renderer.setSize( innerWidth, innerHeight )
-    })
-}
+
 </script>

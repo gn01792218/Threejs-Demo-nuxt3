@@ -1,5 +1,6 @@
 import useModelsUtil from "./useModelsUtil"
 import useImagesUtil from "./useImagesUtil"
+import useResponsive from "./useResponsive"
 
 /**
  * 工具集合入口
@@ -9,9 +10,13 @@ import useImagesUtil from "./useImagesUtil"
 export default function useUtil() {
     const { getModelsAssetsFileURL } = useModelsUtil()
     const { getImagesAssetsFileURL } = useImagesUtil()
+    const { responsiveThreeCanvas } = useResponsive()
     return {
         //methods
         getModelsAssetsFileURL,
         getImagesAssetsFileURL,
+
+        //responsive methods
+        responsiveThreeCanvas,
     }
 }
