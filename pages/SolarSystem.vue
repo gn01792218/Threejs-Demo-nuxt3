@@ -4,7 +4,7 @@
 </template>
 <script lang="ts" setup>
 import * as THREE from 'three'
-import useUtil from '~~/composables/util'
+import useUtil from '../composables/util'
 import useTHREE from '~~/composables/three'
 
 //composables
@@ -24,16 +24,7 @@ const {
 
 const solar = ref<HTMLElement | null>(null)
 //太陽系物件
-// let sun  = getSphereGeometryWithTexture({
-//     radius:16,
-//     widthSegments:30,
-//     heightSegments:30
-// },getImagesAssetsFileURL('sun.jpg'))
-// let mercury = getSphereGeometryWithTexture({
-//     radius:3.2,
-//     widthSegments:30,
-//     heightSegments:30
-// },getImagesAssetsFileURL('space.jpg'))
+let sun, mercury 
 onMounted(() => {
     const [scene, camera, renderer] = init3DWorld(solar.value)
     //設置世界背景
@@ -42,10 +33,21 @@ onMounted(() => {
     //3.建立輔助工具
     addAxesHepler(scene,200)
     addGridHelper(scene, 200, 10)
+
     //orbit control
     addOrbitControls(camera, renderer)
     //添加太陽系物件
-    // addSolar(scene)
+    sun = getSphereGeometryWithTexture({
+            radius:16,
+            widthSegments:30,
+            heightSegments:30
+        },getImagesAssetsFileURL('sun.jpg'))
+    mercury =  getSphereGeometryWithTexture({
+                radius:3.2,
+                widthSegments:30,
+                heightSegments:30
+            },getImagesAssetsFileURL('space.jpg'))
+    addSolar(scene)
 
     //5.設置相機位置退後一點
     camera.position.set(-90, 140, 140)
@@ -60,7 +62,7 @@ onMounted(() => {
 })
 function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rendererObj: THREE.WebGLRenderer, time: number) {
     //sun 動畫
-    // sun.rotateY(0.004)
+    sun.rotateY(0.004)
     //渲染
     rendererObj.render(sceneObj, cameraObj);
 }
@@ -87,8 +89,9 @@ function getSphereGeometryWithTexture(
     return mesh
 }
 function addSolar(sceneObj:THREE.Scene){
-    // sceneObj.add(sun)
-    // sceneObj.add(mercury)
+    sceneObj.add(sun)
+    sceneObj.add(mercury)
+    mercury.position.set(0,20,0)
 }
 
 //設置場景背景圖
@@ -104,7 +107,6 @@ function setWorldCubeBackground(sceneObj: THREE.Scene) {
         spaceImg,
         spaceImg,
     ])
-    console.log(sceneObj.background)
 }
 //貼材質的幾何體，需要在onMounted時再載入唷(因為loader的關係?!)
 
