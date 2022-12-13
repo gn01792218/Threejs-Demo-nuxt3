@@ -17,7 +17,8 @@ const {
 const {
     init3DWorld,  //init3DWorld()創建三要素 : scene、camera、renderer
     loadGLTFModel,
-    addGUI,
+    getGUI,
+    removeGUI,
     addAxesHepler,
     addGridHelper,
     addOrbitControls,
@@ -96,7 +97,8 @@ const options: GUIOptions = {
     penumbra: 0,  //柔光效果
     intensity: 1,
 }
-onMounted(() => {
+let gui:GUI
+onMounted(async () => {
     const [scene, camera, renderer] = init3DWorld(three.value)
     //設置世界背景
     setWorld2DBackground(scene,getImagesAssetsFileURL('space.jpg'))
@@ -109,7 +111,8 @@ onMounted(() => {
     //orbit control
     addOrbitControls(camera, renderer)
     //GUI工具
-    addGUI(options, guiCallBack)
+    gui =await getGUI()
+    addGuiItem(gui, options)
     //4.加入幾何體
     scene.add(cube)
     scene.add(plane)
@@ -148,6 +151,10 @@ onMounted(() => {
     //8.註冊響應式
     responsiveThreeCanvas(camera, renderer)
 })
+onUnmounted(()=>{
+    //釋放gui
+    removeGUI(gui)
+})
 function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rendererObj: THREE.WebGLRenderer, time: number) {
     //操作cube的動畫
     cube.rotation.x = time / 1000;
@@ -182,7 +189,7 @@ function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rend
 }
 
 //GUI設定
-function guiCallBack(gui: GUI, options: GUIOptions) {
+function addGuiItem(gui: GUI, options: GUIOptions) {
     //為物件加入顏色color picker，以控制顏色變化
     gui
         .addColor(options, 'sphereColor')

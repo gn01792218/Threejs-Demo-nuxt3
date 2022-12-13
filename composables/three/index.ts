@@ -9,7 +9,7 @@ import useGUI from "./useGUI";
  */
 export default function useTHREE() {
   const { init3DWorld } = useInitTHREE();
-  const { addGUI } = useGUI();
+  const { getGUI, removeGUI } = useGUI();
   const { loadGLTFModel } = useGLTFLoader(); 
   const { textureLoader, getBoxGeometryWithTexture, setWorld2DBackground } = useTextureLoader();
   const { addAmbientLight, addDirectionLight, addSpotLight } = useLight();
@@ -19,7 +19,8 @@ export default function useTHREE() {
     //methods
     init3DWorld,
     loadGLTFModel,
-    addGUI,
+    getGUI,
+    removeGUI,
 
     //輔助工具
     addAxesHepler,

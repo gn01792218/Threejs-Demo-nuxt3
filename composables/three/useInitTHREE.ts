@@ -22,8 +22,6 @@ export default function useInitTHREE() {
         renderer.setSize(window.innerWidth, window.innerHeight);
         //2.把Renderer掛到DOM中，會是一個canvas
         threeElement.appendChild(renderer.domElement)
-        // document.getElementById(threeElementId).appendChild(renderer.domElement);
-        console.log(threeElement,document)
         return [scene, camera, renderer]
     }
     return {
