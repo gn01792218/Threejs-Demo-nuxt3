@@ -11,7 +11,7 @@ export default function useTHREE() {
   const { init3DWorld } = useInitTHREE();
   const { addGUI } = useGUI();
   const { loadGLTFModel } = useGLTFLoader(); 
-  const { getBoxGeometryWithTexture, setWorld2DBackground } = useTextureLoader();
+  const { textureLoader, getBoxGeometryWithTexture, setWorld2DBackground } = useTextureLoader();
   const { addAmbientLight, addDirectionLight, addSpotLight } = useLight();
   const { addAxesHepler, addGridHelper, addOrbitControls } = useHelper();
 
@@ -27,6 +27,7 @@ export default function useTHREE() {
     addOrbitControls,
 
     //textureLoader
+    textureLoader,
     getBoxGeometryWithTexture,
     setWorld2DBackground,
 

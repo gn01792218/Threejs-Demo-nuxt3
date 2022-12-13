@@ -1,6 +1,5 @@
 <template>
-    <div id="three" class="">
-        太陽系
+    <div id="solar" class="">
     </div>
 </template>
 <script lang="ts" setup>
@@ -19,30 +18,35 @@ const {
     addAxesHepler,
     addGridHelper,
     addOrbitControls,
+    textureLoader,
     getBoxGeometryWithTexture,
-    setWorld2DBackground,
 } = useTHREE()
-
+//太陽系物件
+// let sun  = getSphereGeometryWithTexture({
+//     radius:16,
+//     widthSegments:30,
+//     heightSegments:30
+// },getImagesAssetsFileURL('sun.jpg'))
+// let mercury = getSphereGeometryWithTexture({
+//     radius:3.2,
+//     widthSegments:30,
+//     heightSegments:30
+// },getImagesAssetsFileURL('space.jpg'))
 onMounted(() => {
-    const [scene, camera, renderer] = init3DWorld('three')
+    const [scene, camera, renderer] = init3DWorld('solar')
     //設置世界背景
-    setWorld2DBackground(scene,getImagesAssetsFileURL('space.jpg'))
-    // setWorldCubeBackground(scene)
-    //1.調整renderer設定
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    //2.把Renderer掛到DOM中，會是一個canvas
-    document.getElementById('three').appendChild(renderer.domElement);
+    setWorldCubeBackground(scene)
 
     //3.建立輔助工具
-    addAxesHepler(scene)
-    addGridHelper(scene)
+    addAxesHepler(scene,200)
+    addGridHelper(scene, 200, 10)
     //orbit control
     addOrbitControls(camera, renderer)
-    //貼材質的盒形物件
-    addSpaceTextureCube(scene)
+    //添加太陽系物件
+    // addSolar(scene)
 
     //5.設置相機位置退後一點
-    camera.position.set(1, 1, 5)
+    camera.position.set(-90, 140, 140)
 
     //6.渲染場景
     //預設下每秒會畫60次
@@ -53,22 +57,52 @@ onMounted(() => {
     responsiveThreeCanvas(camera, renderer)
 })
 function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rendererObj: THREE.WebGLRenderer, time: number) {
+    //sun 動畫
+    // sun.rotateY(0.004)
     //渲染
     rendererObj.render(sceneObj, cameraObj);
+}
+//太陽系物件
+interface SphereGeometryProperty{
+    radius:number,
+    widthSegments:number,
+    heightSegments:number
+}
+function getSphereGeometryWithTexture(
+    property:SphereGeometryProperty = {
+        radius:10,
+        widthSegments:10,
+        heightSegments:10
+    },
+    textureImgUrl:string
+){
+    const { radius, widthSegments, heightSegments } = property
+    const geomatry = new THREE.SphereGeometry(radius, widthSegments, heightSegments)
+    const material = new THREE.MeshBasicMaterial({
+        map:textureLoader.load(textureImgUrl)
+    })
+    const mesh = new THREE.Mesh(geomatry, material)
+    return mesh
+}
+function addSolar(sceneObj:THREE.Scene){
+    // sceneObj.add(sun)
+    // sceneObj.add(mercury)
 }
 
 //設置場景背景圖
 //以cubeTexture設置六個面的背景圖
 function setWorldCubeBackground(sceneObj: THREE.Scene) {
     const cubeTextureLoader = new THREE.CubeTextureLoader()
+    let spaceImg = getImagesAssetsFileURL('space.jpg')
     sceneObj.background = cubeTextureLoader.load([
-        getImagesAssetsFileURL('galaxy.jpg'), //左面
-        getImagesAssetsFileURL('sun.jpg'), //右面
-        getImagesAssetsFileURL('space.jpg'),
-        getImagesAssetsFileURL('space.jpg'),
-        getImagesAssetsFileURL('space.jpg'),
-        getImagesAssetsFileURL('space.jpg'),
+        spaceImg, //左面
+        spaceImg, //右面
+        spaceImg,
+        spaceImg,
+        spaceImg,
+        spaceImg,
     ])
+    console.log(sceneObj.background)
 }
 //貼材質的幾何體，需要在onMounted時再載入唷(因為loader的關係?!)
 

@@ -101,10 +101,6 @@ onMounted(() => {
     //設置世界背景
     setWorld2DBackground(scene,getImagesAssetsFileURL('space.jpg'))
     // setWorldCubeBackground(scene)
-    //1.調整renderer設定
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    //2.把Renderer掛到DOM中，會是一個canvas
-    document.getElementById('three').appendChild(renderer.domElement);
     //打開陰影
     enableShadowMap(renderer)
     //3.建立輔助工具

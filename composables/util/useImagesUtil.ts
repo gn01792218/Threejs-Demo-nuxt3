@@ -1,6 +1,6 @@
 export default function useImagesUtil() {
-    function getImagesAssetsFileURL(url: string) {
-        return new URL(`../../assets/images/${url}`, import.meta.url).href
+    function getImagesAssetsFileURL(fileName: string) {
+        return new URL(`/assets/images/${fileName}`, import.meta.url).href
     }
     return {
         //methods

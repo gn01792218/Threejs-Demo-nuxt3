@@ -17,6 +17,8 @@ export default function useInitTHREE() {
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer()
 
+        //切換路由時會娶不到元素
+        console.log(document.getElementById(threeElementId))
         //1.調整renderer設定
         renderer.setSize(window.innerWidth, window.innerHeight);
         //2.把Renderer掛到DOM中，會是一個canvas

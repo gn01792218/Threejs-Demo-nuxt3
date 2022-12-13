@@ -26,6 +26,8 @@ export default function useTextureLoader() {
         sceneObj.background = textureLoader.load(bg)
     }
     return {
+        //data
+        textureLoader,
         //methods
         getBoxGeometryWithTexture,
         setWorld2DBackground,
