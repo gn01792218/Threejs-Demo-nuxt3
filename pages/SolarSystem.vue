@@ -41,12 +41,12 @@ onMounted(() => {
             radius:16,
             widthSegments:30,
             heightSegments:30
-        },getImagesAssetsFileURL('sun.jpg'))
+        },getImagesAssetsFileURL('sunmap.jpg'))
     mercury =  getSphereGeometryWithTexture({
                 radius:3.2,
                 widthSegments:30,
                 heightSegments:30
-            },getImagesAssetsFileURL('space.jpg'))
+            },getImagesAssetsFileURL('mercurymap.jpg'))
     addSolar(scene)
 
     //5.設置相機位置退後一點
