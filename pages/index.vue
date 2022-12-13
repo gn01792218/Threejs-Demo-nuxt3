@@ -1,5 +1,5 @@
 <template>
-    <div id="three" class="">
+    <div ref="three" class="">
     </div>
 </template>
 <script lang="ts" setup>
@@ -27,7 +27,7 @@ const {
     getBoxGeometryWithTexture,
     setWorld2DBackground,
 } = useTHREE()
-
+const three = ref<HTMLElement | null>(null)
 // 2、加入幾何物件
 //建立方形物件的二元素 材質、幾何體、網格
 // BoxGeometry - 盒型幾何物件 ， 盒型物件包含了頂點、面
@@ -97,7 +97,7 @@ const options: GUIOptions = {
     intensity: 1,
 }
 onMounted(() => {
-    const [scene, camera, renderer] = init3DWorld('three')
+    const [scene, camera, renderer] = init3DWorld(three.value)
     //設置世界背景
     setWorld2DBackground(scene,getImagesAssetsFileURL('space.jpg'))
     // setWorldCubeBackground(scene)

@@ -1,5 +1,5 @@
 <template>
-    <div id="solar" class="">
+    <div ref="solar" class="">
     </div>
 </template>
 <script lang="ts" setup>
@@ -21,6 +21,8 @@ const {
     textureLoader,
     getBoxGeometryWithTexture,
 } = useTHREE()
+
+const solar = ref<HTMLElement | null>(null)
 //太陽系物件
 // let sun  = getSphereGeometryWithTexture({
 //     radius:16,
@@ -33,7 +35,7 @@ const {
 //     heightSegments:30
 // },getImagesAssetsFileURL('space.jpg'))
 onMounted(() => {
-    const [scene, camera, renderer] = init3DWorld('solar')
+    const [scene, camera, renderer] = init3DWorld(solar.value)
     //設置世界背景
     setWorldCubeBackground(scene)
 

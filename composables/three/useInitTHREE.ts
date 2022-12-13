@@ -9,20 +9,21 @@ export default function useInitTHREE() {
      * const [scene, camera, renderer] = init3DWorld('three')
      * 
      * 注意事項 : 
-     * 因為有需要和Dom互動，所以請在mounted時使用
+     * 因為camera和 renderer需要和Dom互動，所以請在mounted時使用
      */
-    function init3DWorld(threeElementId: string): [THREE.Scene, THREE.PerspectiveCamera, THREE.WebGLRenderer] {
+    function init3DWorld(threeElement: HTMLElement): [THREE.Scene, THREE.PerspectiveCamera, THREE.WebGLRenderer] {
         //1.創建三要素 : scene、camera、renderer
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer()
 
         //切換路由時會娶不到元素
-        console.log(document.getElementById(threeElementId))
         //1.調整renderer設定
         renderer.setSize(window.innerWidth, window.innerHeight);
         //2.把Renderer掛到DOM中，會是一個canvas
-        document.getElementById(threeElementId).appendChild(renderer.domElement);
+        threeElement.appendChild(renderer.domElement)
+        // document.getElementById(threeElementId).appendChild(renderer.domElement);
+        console.log(threeElement,document)
         return [scene, camera, renderer]
     }
     return {
