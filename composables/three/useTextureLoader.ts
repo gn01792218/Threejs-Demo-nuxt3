@@ -66,8 +66,8 @@ export default function useTextureLoader() {
     interface RingGeometryProperty{
         innerRadius:number,
         outerRadius:number,
-        theatSegments:number,
-        phiSegments:number
+        theatSegments:number, //數值越高，環形外框越圓滑
+        phiSegments:number  //數值越高，環形平面的段數越多
     }
     function getRingGeometryWithTexture (
         materialType:MaterialEnum,
@@ -75,8 +75,8 @@ export default function useTextureLoader() {
         property:RingGeometryProperty = {
             innerRadius:10,
             outerRadius:20,
-            theatSegments:32,
-            phiSegments:10
+            theatSegments:20,
+            phiSegments:1
         }) {
         const { innerRadius, outerRadius, theatSegments, phiSegments } = property
         const geomatry = new THREE.RingGeometry(innerRadius, outerRadius, theatSegments, phiSegments)

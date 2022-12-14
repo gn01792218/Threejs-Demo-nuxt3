@@ -69,7 +69,13 @@ onMounted(() => {
         })
     satrunRing = getRingGeometryWithTexture(
         MaterialEnum.MeshBasicMaterial,
-        getImagesAssetsFileURL('saturnringcolor.jpg'),
+        getImagesAssetsFileURL('saturnringpattern.gif'),
+        {
+            innerRadius:15,
+            outerRadius:20,
+            theatSegments:30,
+            phiSegments:1
+        }
     )
     //場控
     addSolarControler(scene)
@@ -110,10 +116,10 @@ function addSolarControler(sceneObj:THREE.Scene){
     //土星
     sceneObj.add(staturnParent)
     staturnParent.add(saturn)
-    saturn.position.set(35,0,0)
+    saturn.position.set(38,0,0)
     //土星環
     staturnParent.add(satrunRing)
-    satrunRing.position.set(35,0,0)
+    satrunRing.position.set(38,0,0)
     satrunRing.rotation.x = -0.5 * Math.PI
 }
 
