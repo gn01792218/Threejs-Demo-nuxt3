@@ -13,7 +13,7 @@ export default function useTHREE() {
   const { init3DWorld } = useInitTHREE();
   const { getGUI, removeGUI } = useGUI();
   const { loadGLTFModel } = useGLTFLoader(); 
-  const { textureLoader, getSphereGeometryWithTexture, getBoxGeometryWithTexture, setWorld2DBackground } = useTextureLoader();
+  const { textureLoader, getSphereGeometryWithTexture, getBoxGeometryWithTexture, getRingGeometryWithTexture, setWorld2DBackground } = useTextureLoader();
   const { addAmbientLight, addPointLight, addDirectionLight, addSpotLight } = useLight();
   const { addAxesHepler, addGridHelper, addOrbitControls } = useHelper();
 
@@ -34,6 +34,7 @@ export default function useTHREE() {
     textureLoader,
     getSphereGeometryWithTexture,
     getBoxGeometryWithTexture,
+    getRingGeometryWithTexture,
     setWorld2DBackground,
 
     //光源

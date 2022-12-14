@@ -57,6 +57,41 @@ export default function useTextureLoader() {
         return mesh
     }
 
+    /**
+     * 帶狀物體帶材質
+     * @param textureImgUrl 必填
+     * @param property 選填，控制環形內外圈大小、內外圈切數。型態如interface RingGeometryProperty
+     * @returns 帶狀物體帶材質
+     */
+    interface RingGeometryProperty{
+        innerRadius:number,
+        outerRadius:number,
+        theatSegments:number,
+        phiSegments:number
+    }
+    function getRingGeometryWithTexture (
+        materialType:MaterialEnum,
+        textureImgUrl:string,
+        property:RingGeometryProperty = {
+            innerRadius:10,
+            outerRadius:20,
+            theatSegments:32,
+            phiSegments:10
+        }) {
+        const { innerRadius, outerRadius, theatSegments, phiSegments } = property
+        const geomatry = new THREE.RingGeometry(innerRadius, outerRadius, theatSegments, phiSegments)
+        let material 
+        switch(materialType){
+            case MaterialEnum.MeshBasicMaterial :
+                material = new THREE.MeshBasicMaterial({ map:textureLoader.load(textureImgUrl), side:THREE.DoubleSide })
+                break
+            case MaterialEnum.MeshStandardMaterial : 
+                material = new THREE.MeshStandardMaterial({ map:textureLoader.load(textureImgUrl), side:THREE.DoubleSide })
+                break
+        }
+        const mesh = new THREE.Mesh(geomatry, material)
+        return mesh
+    }
     //設置world
     function setWorld2DBackground(sceneObj: THREE.Scene, bg:string) {
         sceneObj.background = textureLoader.load(bg)
@@ -67,6 +102,7 @@ export default function useTextureLoader() {
         //methods
         getSphereGeometryWithTexture,
         getBoxGeometryWithTexture,
+        getRingGeometryWithTexture,
         setWorld2DBackground,
     }
 }

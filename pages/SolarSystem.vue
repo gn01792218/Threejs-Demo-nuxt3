@@ -21,14 +21,16 @@ const {
     addOrbitControls,
     addPointLight,
     getBoxGeometryWithTexture,
+    getRingGeometryWithTexture,
     getSphereGeometryWithTexture,
 } = useTHREE()
 
 const solar = ref<HTMLElement | null>(null)
 //太陽系物件
-let sun, mercury 
+let sun, mercury, saturn, satrunRing
 //九大行星的基準物件
 const mercuryParent = new THREE.Object3D()
+const staturnParent = new THREE.Object3D()
 onMounted(() => {
     const [scene, camera, renderer] = init3DWorld(solar.value)
     //設置世界背景
@@ -56,8 +58,19 @@ onMounted(() => {
                 radius:3.2,
                 widthSegments:30,
                 heightSegments:30
-            })
-    
+        })
+    saturn = getSphereGeometryWithTexture(
+        MaterialEnum.MeshStandardMaterial,
+        getImagesAssetsFileURL('saturnmap.jpg'),
+        {
+                radius:10,
+                widthSegments:30,
+                heightSegments:30
+        })
+    satrunRing = getRingGeometryWithTexture(
+        MaterialEnum.MeshBasicMaterial,
+        getImagesAssetsFileURL('saturnringcolor.jpg'),
+    )
     //場控
     addSolarControler(scene)
 
@@ -76,10 +89,12 @@ onMounted(() => {
     responsiveThreeCanvas(camera, renderer)
 })
 function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rendererObj: THREE.WebGLRenderer, time: number) {
-    //自轉 動畫
-    sun.rotateY(0.004)
-    mercuryParent.rotateY(0.04)
+    //公轉、自轉 動畫
+    sun.rotateY(0.004) 
+    mercuryParent.rotateY(0.004) 
     mercury.rotateY(0.004)
+    staturnParent.rotateY(0.009)
+    saturn.rotateY(0.002)
     //渲染
     rendererObj.render(sceneObj, cameraObj);
 }
@@ -90,7 +105,16 @@ function addSolarControler(sceneObj:THREE.Scene){
     //水星
     sceneObj.add(mercuryParent) 
     mercuryParent.add(mercury)
-    mercury.position.set(30,0,0)
+    mercury.position.set(28,0,0)
+
+    //土星
+    sceneObj.add(staturnParent)
+    staturnParent.add(saturn)
+    saturn.position.set(35,0,0)
+    //土星環
+    staturnParent.add(satrunRing)
+    satrunRing.position.set(35,0,0)
+    satrunRing.rotation.x = -0.5 * Math.PI
 }
 
 //設置場景背景圖
