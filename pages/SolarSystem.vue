@@ -27,6 +27,8 @@ const {
 const solar = ref<HTMLElement | null>(null)
 //太陽系物件
 let sun, mercury 
+//九大行星的基準物件
+const mercuryParent = new THREE.Object3D()
 onMounted(() => {
     const [scene, camera, renderer] = init3DWorld(solar.value)
     //設置世界背景
@@ -55,7 +57,7 @@ onMounted(() => {
                 widthSegments:30,
                 heightSegments:30
             })
-
+    
     //場控
     addSolarControler(scene)
 
@@ -76,6 +78,7 @@ onMounted(() => {
 function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rendererObj: THREE.WebGLRenderer, time: number) {
     //自轉 動畫
     sun.rotateY(0.004)
+    mercuryParent.rotateY(0.04)
     mercury.rotateY(0.004)
     //渲染
     rendererObj.render(sceneObj, cameraObj);
@@ -83,11 +86,10 @@ function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rend
 //太陽系場控
 function addSolarControler(sceneObj:THREE.Scene){
     sceneObj.add(sun)
-
-    //設置太陽的子物件
-
+    //九大行星
     //水星
-    sun.add(mercury)
+    sceneObj.add(mercuryParent) 
+    mercuryParent.add(mercury)
     mercury.position.set(30,0,0)
 }
 
