@@ -14,12 +14,14 @@ const {
 } = useUtil()
 
 const {
+    MaterialEnum,
     init3DWorld,  //init3DWorld()創建三要素 : scene、camera、renderer
     addAxesHepler,
     addGridHelper,
     addOrbitControls,
-    textureLoader,
+    addPointLight,
     getBoxGeometryWithTexture,
+    getSphereGeometryWithTexture,
 } = useTHREE()
 
 const solar = ref<HTMLElement | null>(null)
@@ -37,17 +39,28 @@ onMounted(() => {
     //orbit control
     addOrbitControls(camera, renderer)
     //添加太陽系物件
-    sun = getSphereGeometryWithTexture({
+    sun = getSphereGeometryWithTexture(
+        MaterialEnum.MeshBasicMaterial,
+        getImagesAssetsFileURL('sunmap.jpg'),
+        {
             radius:16,
             widthSegments:30,
             heightSegments:30
-        },getImagesAssetsFileURL('sunmap.jpg'))
-    mercury =  getSphereGeometryWithTexture({
+        })
+    mercury = getSphereGeometryWithTexture(
+        MaterialEnum.MeshStandardMaterial,
+        getImagesAssetsFileURL('mercurymap.jpg'),
+        {
                 radius:3.2,
                 widthSegments:30,
                 heightSegments:30
-            },getImagesAssetsFileURL('mercurymap.jpg'))
-    addSolar(scene)
+            })
+
+    //場控
+    addSolarControler(scene)
+
+    //光源
+    const sunLight = addPointLight(scene,0xFFFFFF, 2 , 300)
 
     //5.設置相機位置退後一點
     camera.position.set(-90, 140, 140)
@@ -61,37 +74,21 @@ onMounted(() => {
     responsiveThreeCanvas(camera, renderer)
 })
 function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rendererObj: THREE.WebGLRenderer, time: number) {
-    //sun 動畫
+    //自轉 動畫
     sun.rotateY(0.004)
+    mercury.rotateY(0.004)
     //渲染
     rendererObj.render(sceneObj, cameraObj);
 }
-//太陽系物件
-interface SphereGeometryProperty{
-    radius:number,
-    widthSegments:number,
-    heightSegments:number
-}
-function getSphereGeometryWithTexture(
-    property:SphereGeometryProperty = {
-        radius:10,
-        widthSegments:10,
-        heightSegments:10
-    },
-    textureImgUrl:string
-){
-    const { radius, widthSegments, heightSegments } = property
-    const geomatry = new THREE.SphereGeometry(radius, widthSegments, heightSegments)
-    const material = new THREE.MeshBasicMaterial({
-        map:textureLoader.load(textureImgUrl)
-    })
-    const mesh = new THREE.Mesh(geomatry, material)
-    return mesh
-}
-function addSolar(sceneObj:THREE.Scene){
+//太陽系場控
+function addSolarControler(sceneObj:THREE.Scene){
     sceneObj.add(sun)
-    sceneObj.add(mercury)
-    mercury.position.set(0,20,0)
+
+    //設置太陽的子物件
+
+    //水星
+    sun.add(mercury)
+    mercury.position.set(30,0,0)
 }
 
 //設置場景背景圖

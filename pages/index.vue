@@ -135,9 +135,12 @@ onMounted(async () => {
     const ambientLight = addAmbientLight(scene)
     const spotLight = addSpotLight(scene)
     const spotLightHelper = addSpotLightHelper(scene, spotLight)
+    spotLight.position.set(-5, 5, 0)
+    spotLight.angle = 0.8     //調整聚光燈發散角度
     // const directionLight = addDirectionLight(scene)
     // const directionLightHelper = addDirectionLightHelper(scene,directionLight)
     // const directionLightShadowHelper =  addDirectionLightShadowHelper(scene, directionLight)
+    // directionLight.position.set(-10, 10, 0);
 
     //8.場景霧化效果
     // scene.fog = new THREE.Fog(0xFFFFFF,5,100)

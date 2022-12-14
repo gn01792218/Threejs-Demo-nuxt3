@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { MaterialEnum } from '@/types/three'
 /**
  * 材質物件 集合
  * 建構各種貼材質的幾何物件中心
@@ -7,9 +8,9 @@ export default function useTextureLoader() {
     const textureLoader = new THREE.TextureLoader()  //材質下載
 
     /**
-     * 
+     * 盒形幾何體(6面材質張貼)
      * @param textureUrlArray 需傳入6張材質圖檔，作為盒形六個面
-     * @returns 返回一個THREE.Mesh<THREE.BoxGeometry>物件
+     * @returns 盒形幾何體(6面材質張貼)
      */
     function getBoxGeometryWithTexture (textureUrlArray:Array<string>) {
         const geometry = new THREE.BoxGeometry(1, 1, 1)
@@ -20,6 +21,41 @@ export default function useTextureLoader() {
         const cube = new THREE.Mesh(geometry, material)
         return cube
     }
+    
+    /**
+     * 球體帶材質
+     * @param textureImgUrl 必填
+     * @param property 選填，控制球體大小、切線數量。型態如interface SphereGeometryProperty
+     * @returns 球體帶材質
+     */
+    interface SphereGeometryProperty{
+        radius:number,
+        widthSegments:number,
+        heightSegments:number
+    }
+    function getSphereGeometryWithTexture(
+        materialType:MaterialEnum,
+        textureImgUrl:string,
+        property:SphereGeometryProperty = {
+            radius:10,
+            widthSegments:10,
+            heightSegments:10
+        }
+    ){
+        const { radius, widthSegments, heightSegments } = property
+        const geomatry = new THREE.SphereGeometry(radius, widthSegments, heightSegments)
+        let material 
+        switch(materialType){
+            case MaterialEnum.MeshBasicMaterial :
+                material = new THREE.MeshBasicMaterial({ map:textureLoader.load(textureImgUrl) })
+                break
+                case MaterialEnum.MeshStandardMaterial : 
+                material = new THREE.MeshStandardMaterial({ map:textureLoader.load(textureImgUrl) })
+                break
+        }
+        const mesh = new THREE.Mesh(geomatry, material)
+        return mesh
+    }
 
     //設置world
     function setWorld2DBackground(sceneObj: THREE.Scene, bg:string) {
@@ -29,6 +65,7 @@ export default function useTextureLoader() {
         //data
         textureLoader,
         //methods
+        getSphereGeometryWithTexture,
         getBoxGeometryWithTexture,
         setWorld2DBackground,
     }

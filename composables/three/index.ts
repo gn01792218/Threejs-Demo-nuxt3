@@ -1,3 +1,4 @@
+import useThreeTypes from "./useThreeTypes";
 import useInitTHREE from "./useInitTHREE";
 import useGLTFLoader from "./useGLTFLoader";
 import useTextureLoader from "./useTextureLoader";
@@ -8,11 +9,12 @@ import useGUI from "./useGUI";
  * Three.js 相關集合入口
  */
 export default function useTHREE() {
+  const { MaterialEnum } = useThreeTypes()
   const { init3DWorld } = useInitTHREE();
   const { getGUI, removeGUI } = useGUI();
   const { loadGLTFModel } = useGLTFLoader(); 
-  const { textureLoader, getBoxGeometryWithTexture, setWorld2DBackground } = useTextureLoader();
-  const { addAmbientLight, addDirectionLight, addSpotLight } = useLight();
+  const { textureLoader, getSphereGeometryWithTexture, getBoxGeometryWithTexture, setWorld2DBackground } = useTextureLoader();
+  const { addAmbientLight, addPointLight, addDirectionLight, addSpotLight } = useLight();
   const { addAxesHepler, addGridHelper, addOrbitControls } = useHelper();
 
   return {
@@ -28,12 +30,15 @@ export default function useTHREE() {
     addOrbitControls,
 
     //textureLoader
+    MaterialEnum,
     textureLoader,
+    getSphereGeometryWithTexture,
     getBoxGeometryWithTexture,
     setWorld2DBackground,
 
     //光源
     addAmbientLight,
+    addPointLight,
     addDirectionLight,
     addSpotLight,
   };
