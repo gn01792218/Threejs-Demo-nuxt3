@@ -1,4 +1,3 @@
-import useThreeTypes from "./useThreeTypes";
 import useInitTHREE from "./useInitTHREE";
 import useGLTFLoader from "./useGLTFLoader";
 import useTextureLoader from "./useTextureLoader";
@@ -9,7 +8,6 @@ import useGUI from "./useGUI";
  * Three.js 相關集合入口
  */
 export default function useTHREE() {
-  const { MaterialEnum } = useThreeTypes()
   const { init3DWorld } = useInitTHREE();
   const { getGUI, removeGUI } = useGUI();
   const { loadGLTFModel } = useGLTFLoader(); 
@@ -30,7 +28,6 @@ export default function useTHREE() {
     addOrbitControls,
 
     //textureLoader
-    MaterialEnum,
     textureLoader,
     getSphereGeometryWithTexture,
     getBoxGeometryWithTexture,

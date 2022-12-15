@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { MaterialEnum } from '@/types/three'
+import { MaterialEnum, RingGeometryProperty, SphereGeometryProperty } from '@/types/three'
 /**
  * 材質物件 集合
  * 建構各種貼材質的幾何物件中心
@@ -28,11 +28,7 @@ export default function useTextureLoader() {
      * @param property 選填，控制球體大小、切線數量。型態如interface SphereGeometryProperty
      * @returns 球體帶材質
      */
-    interface SphereGeometryProperty{
-        radius:number,
-        widthSegments:number,
-        heightSegments:number
-    }
+    
     function getSphereGeometryWithTexture(
         materialType:MaterialEnum,
         textureImgUrl:string,
@@ -63,12 +59,6 @@ export default function useTextureLoader() {
      * @param property 選填，控制環形內外圈大小、內外圈切數。型態如interface RingGeometryProperty
      * @returns 帶狀物體帶材質
      */
-    interface RingGeometryProperty{
-        innerRadius:number,
-        outerRadius:number,
-        theatSegments:number, //數值越高，環形外框越圓滑
-        phiSegments:number  //數值越高，環形平面的段數越多
-    }
     function getRingGeometryWithTexture (
         materialType:MaterialEnum,
         textureImgUrl:string,

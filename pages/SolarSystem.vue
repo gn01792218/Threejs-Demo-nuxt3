@@ -6,7 +6,17 @@
 import * as THREE from 'three'
 import useUtil from '../composables/util'
 import useTHREE from '~~/composables/three'
-
+import { MaterialEnum, RingGeometryProperty, SphereGeometryProperty } from '~~/types/three';
+interface PlanetRin {
+    rinMaterailType: MaterialEnum,
+    rinTexture: string,
+    rinProperty: RingGeometryProperty
+}
+interface PlanetObject {
+    planet: THREE.Mesh<THREE.SphereGeometry, any>,
+    planetParent: THREE.Object3D<THREE.Event>,
+    rin?:THREE.Mesh<THREE.RingGeometry, any>
+}
 //composables
 const {
     getImagesAssetsFileURL,
@@ -14,7 +24,6 @@ const {
 } = useUtil()
 
 const {
-    MaterialEnum,
     init3DWorld,  //init3DWorld()創建三要素 : scene、camera、renderer
     addAxesHepler,
     addGridHelper,
@@ -27,17 +36,16 @@ const {
 
 const solar = ref<HTMLElement | null>(null)
 //太陽系物件
-let sun, mercury, saturn, satrunRing
-//九大行星的基準物件
-const mercuryParent = new THREE.Object3D()
-const staturnParent = new THREE.Object3D()
+let sun, 
+    mercury:PlanetObject, 
+    saturn:PlanetObject
 onMounted(() => {
     const [scene, camera, renderer] = init3DWorld(solar.value)
     //設置世界背景
     setWorldCubeBackground(scene)
 
     //3.建立輔助工具
-    addAxesHepler(scene,200)
+    addAxesHepler(scene, 200)
     addGridHelper(scene, 200, 10)
 
     //orbit control
@@ -47,41 +55,41 @@ onMounted(() => {
         MaterialEnum.MeshBasicMaterial,
         getImagesAssetsFileURL('sunmap.jpg'),
         {
-            radius:16,
-            widthSegments:30,
-            heightSegments:30
+            radius: 16,
+            widthSegments: 30,
+            heightSegments: 30
         })
-    mercury = getSphereGeometryWithTexture(
+    mercury = createPlanet(
         MaterialEnum.MeshStandardMaterial,
         getImagesAssetsFileURL('mercurymap.jpg'),
         {
-                radius:3.2,
-                widthSegments:30,
-                heightSegments:30
+            radius: 3.2,
+            widthSegments: 30,
+            heightSegments: 30
         })
-    saturn = getSphereGeometryWithTexture(
+    saturn = createPlanet(
         MaterialEnum.MeshStandardMaterial,
         getImagesAssetsFileURL('saturnmap.jpg'),
         {
-                radius:10,
-                widthSegments:30,
-                heightSegments:30
-        })
-    satrunRing = getRingGeometryWithTexture(
-        MaterialEnum.MeshBasicMaterial,
-        getImagesAssetsFileURL('saturnringpattern.gif'),
+            radius: 10,
+            widthSegments: 30,
+            heightSegments: 30
+        },
         {
-            innerRadius:15,
-            outerRadius:20,
-            theatSegments:30,
-            phiSegments:1
-        }
-    )
+            rinMaterailType: MaterialEnum.MeshBasicMaterial,
+            rinTexture:getImagesAssetsFileURL('saturnringpattern.gif'),
+            rinProperty:{
+                innerRadius: 15,
+                outerRadius: 20,
+                theatSegments: 30,
+                phiSegments: 1
+            }
+        })
     //場控
     addSolarControler(scene)
 
     //光源
-    const sunLight = addPointLight(scene,0xFFFFFF, 2 , 300)
+    const sunLight = addPointLight(scene, 0xFFFFFF, 2, 300)
 
     //5.設置相機位置退後一點
     camera.position.set(-90, 140, 140)
@@ -96,31 +104,48 @@ onMounted(() => {
 })
 function animate(sceneObj: THREE.Scene, cameraObj: THREE.PerspectiveCamera, rendererObj: THREE.WebGLRenderer, time: number) {
     //公轉、自轉 動畫
-    sun.rotateY(0.004) 
-    mercuryParent.rotateY(0.004) 
-    mercury.rotateY(0.004)
-    staturnParent.rotateY(0.009)
-    saturn.rotateY(0.002)
+    sun.rotateY(0.004)
+    mercury.planetParent.rotateY(0.004)
+    mercury.planet.rotateY(0.004)
+    saturn.planetParent.rotateY(0.009)
+    saturn.planet.rotateY(0.002)
     //渲染
     rendererObj.render(sceneObj, cameraObj);
 }
+
+/**
+ * 星球製造
+ * @param planetMaterailType 
+ * @param planetTexture 
+ * @param planetProperty 
+ * @param planetRin 選填，需要星環的可以傳入星環物件
+ */
+function createPlanet(planetMaterailType: MaterialEnum, planetTexture: string, planetProperty: SphereGeometryProperty, planetRin?: PlanetRin):PlanetObject{
+    const planet = getSphereGeometryWithTexture(planetMaterailType, planetTexture, planetProperty)
+    const planetParent = new THREE.Object3D()  //星球的參照物件
+    planetParent.add(planet)
+    if (planetRin) { //星環
+        const { rinMaterailType, rinTexture, rinProperty } = planetRin
+        const rin = getRingGeometryWithTexture(rinMaterailType, rinTexture, rinProperty)
+        rin.rotation.x = -0.5 * Math.PI
+        planetParent.add(rin)
+        return { planet, planetParent, rin }
+    }
+    return { planet, planetParent }
+}
+
 //太陽系場控
-function addSolarControler(sceneObj:THREE.Scene){
+function addSolarControler(sceneObj: THREE.Scene) {
     sceneObj.add(sun)
     //九大行星
     //水星
-    sceneObj.add(mercuryParent) 
-    mercuryParent.add(mercury)
-    mercury.position.set(28,0,0)
+    sceneObj.add(mercury.planetParent)
+    mercury.planet.position.set(28, 0, 0)
 
     //土星
-    sceneObj.add(staturnParent)
-    staturnParent.add(saturn)
-    saturn.position.set(38,0,0)
-    //土星環
-    staturnParent.add(satrunRing)
-    satrunRing.position.set(38,0,0)
-    satrunRing.rotation.x = -0.5 * Math.PI
+    sceneObj.add(saturn.planetParent)
+    saturn.planet.position.set(38, 0, 0)
+    saturn.rin.position.set(38, 0, 0)
 }
 
 //設置場景背景圖
