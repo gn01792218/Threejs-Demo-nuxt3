@@ -3,6 +3,13 @@ export enum MaterialEnum {
     MeshStandardMaterial,
 }
 
+//基本
+export interface Position3D {
+    x: number,
+    y: number,
+    z: number
+}
+
 //幾何物件屬性
 export interface SphereGeometryProperty{
     radius:number,

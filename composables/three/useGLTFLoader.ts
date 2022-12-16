@@ -1,11 +1,8 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import useUtil from '~~/composables/util'
-interface Position {
-    x: number,
-    y: number,
-    z: number
-}
+import { Position3D } from '~~/types/three'
+
 export default function useGLTFLoader() {
     const { getModelsAssetsFileURL } = useUtil()
     /**
@@ -15,7 +12,7 @@ export default function useGLTFLoader() {
  * @param position 選填，檔案初始位置座標，預設( 0,0,0 )
  * @param camera 選填，可以將我們的camera設置成下載檔案中的"第一台"攝影機
  */
-    function loadGLTFModel(modelFileName: string, scene: THREE.Scene, position: Position, camera?: THREE.Camera) {
+    function loadGLTFModel(modelFileName: string, scene: THREE.Scene, position: Position3D, camera?: THREE.Camera) {
         const gltfLoader = new GLTFLoader()
 
         gltfLoader.load(getModelsAssetsFileURL(modelFileName), (gltf) => {
